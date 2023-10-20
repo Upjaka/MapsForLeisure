@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
@@ -12,7 +13,8 @@ import org.osmdroid.views.MapView;
 public class MainActivity extends Activity {
     MapView map = null;
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //handle permissions first, before map is created. not depicted here
@@ -31,9 +33,17 @@ public class MainActivity extends Activity {
 
         map = (MapView) findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
+        map.setScrollableAreaLimitLatitude(
+                MapView.getTileSystem().getMaxLatitude(), MapView.getTileSystem().getMinLatitude(), 0
+        );
+
+        map.setMinZoomLevel(3.0);
+        map.getController().setZoom(4);
+        map.setHorizontalMapRepetitionEnabled(true);
+        map.setVerticalMapRepetitionEnabled(false);
     }
 
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
@@ -42,7 +52,7 @@ public class MainActivity extends Activity {
         map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
     }
 
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
