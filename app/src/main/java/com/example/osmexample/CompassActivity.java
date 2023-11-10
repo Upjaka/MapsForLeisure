@@ -22,7 +22,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        compassImageView = findViewById(R.id.compassImageView);
+        //compassImageView = findViewById(R.id.compassImageView);
         // Другие инициализации и настройки
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         magneticSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
