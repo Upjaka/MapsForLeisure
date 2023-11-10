@@ -7,7 +7,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.Manifest;
-import android.widget.Toast;
+import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -30,26 +31,29 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends Activity implements MapEventsReceiver {
     MapView map = null;
     GeoPoint userLocation = null;
+    Gson gson = new Gson();
+    ArrayList<Double[]> markers = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //handle permissions first, before map is created. not depicted here
-
-        //load/initialize the osmdroid configuration, this can be done
         Context context = getApplicationContext();
         Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context));
-        //setting this before the layout is inflated is a good idea
-        //it 'should' ensure that the map has a writable location for the map cache, even without permissions
-        //if no tiles are displayed, you can try overriding the cache path using Configuration.getInstance().setCachePath
-        //see also StorageUtils
-        //note, the load method also sets the HTTP User Agent to your application's package name, abusing osm's tile servers will get you banned based on this string
 
         //inflate and create the map
         setContentView(R.layout.activity_main);
@@ -90,7 +94,7 @@ public class MainActivity extends Activity implements MapEventsReceiver {
                         userLocation = new GeoPoint(latitude, longitude);
 
                         // Добавление маркера текущего местоположения
-                        addMarker(userLocation);
+                        addMarker(userLocation, false);
                     } else {
                         // Местоположение не доступно, обработайте это соответственно
                         userLocation = new GeoPoint(58.200897, 68.253976);
@@ -103,24 +107,49 @@ public class MainActivity extends Activity implements MapEventsReceiver {
             // Запрос разрешений
             requestLocationPermission();
         }
+
+        // Добавление меток на карту
+        try (FileReader reader = new FileReader(getFilesDir() + "/markers.json")) {
+            Type listType = new TypeToken<ArrayList<Double[]>>(){}.getType();
+            markers = gson.fromJson(reader, listType);
+
+        } catch (IOException e) {
+            markers = new ArrayList<>();
+        }
+        String msg = "Data downloaded from file: ";
+        for (Double[] point: markers) {
+            addMarker(new GeoPoint(point[0], point[1]), false);
+            msg = msg + Arrays.toString(point);
+        }
+        Log.d("JSON", msg);
     }
 
     public void onResume() {
         super.onResume();
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-        map.onResume(); //needed for compass, my location overlays, v6.0.0 and up
+        map.onResume();
     }
 
     public void onPause() {
         super.onPause();
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
-        map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
+        map.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Сохранение JSON в файл
+        String json = gson.toJson(markers);
+        try (FileWriter writer = new FileWriter(getFilesDir() + "/markers.json")) {
+            writer.write(json);
+            String msg = "Data saved to file: ";
+            for (Double[] point: markers) {
+                msg = msg + Arrays.toString(point);
+            }
+            Log.d("JSON", msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Проверка наличия разрешений на доступ к местоположению
@@ -135,7 +164,9 @@ public class MainActivity extends Activity implements MapEventsReceiver {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 12345);
     }
 
-    private void addMarker(GeoPoint markerLocation) {
+    private void addMarker(GeoPoint markerLocation, boolean addToArray) {
+        Double[] point = {markerLocation.getLatitude(), markerLocation.getLongitude()};
+        if (addToArray) markers.add(point);
         Marker startMarker = new Marker(map);
         startMarker.setPosition(markerLocation);
         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -152,7 +183,7 @@ public class MainActivity extends Activity implements MapEventsReceiver {
 
     @Override
     public boolean longPressHelper(GeoPoint p) {
-        addMarker(p);
+        addMarker(p, true);
 //        RoadManager roadManager = new OSRMRoadManager(this, "MY_USER_AGENT");
 //        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
 //        waypoints.add(userLocation);
@@ -164,6 +195,10 @@ public class MainActivity extends Activity implements MapEventsReceiver {
 //        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
 //        map.getOverlays().add(roadOverlay);
         return false;
+    }
+
+    public void onMapCenterButtonClick(View view) {
+        map.getController().setCenter(userLocation);
     }
 
     //    @Override
