@@ -16,6 +16,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity{
     private final String API_KEY = "1c1210f8-c152-4c8d-96ae-ac504e3662c4";
     private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
+    private final int LOADING_SCREEN_TIME_OUT = 1000;
     private final float MARKER_SCALE = 0.06f;
     private final float LOCATION_MARKER_SCALE = 0.14f;
     private final float START_ZOOM = 14.0f;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity{
     private Point userLocation = new Point(0, 0);
     private PlacemarkMapObject locationMarker = null;
     private InputListener inputListener = null;
+    private FrameLayout loadingScreen = null;
     private FrameLayout mainLayout = null;
     private LinearLayout setMarkerLayout = null;
     private LinearLayout markerInfoPanel = null;
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity{
         mainLayout = findViewById(R.id.MainLayout);
         setMarkerLayout = findViewById(R.id.setMarkerLayout);
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
-
+        loadingScreen = findViewById(R.id.loadingScreen);
 
         // Определение местоположения
         requestLocationPermission();
@@ -126,6 +129,11 @@ public class MainActivity extends AppCompatActivity{
                 new Animation(SMOOTH, 0.3f),
                 null
         );
+
+        new Handler().postDelayed(() -> {
+            loadingScreen.setVisibility(View.GONE);
+            mainLayout.setVisibility(View.VISIBLE);
+        }, LOADING_SCREEN_TIME_OUT);
     }
 
     private final LocationListener locationListener = new LocationListener() {
