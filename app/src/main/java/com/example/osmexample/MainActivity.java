@@ -41,6 +41,7 @@ import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.runtime.image.ImageProvider;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity{
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity{
         locationMarker.setIconStyle(new IconStyle().setScale(LOCATION_MARKER_SCALE));
         locationMarker.addTapListener(onMarkerTapListener);
 
+        // Обработчик долгого нажатия на карту
         inputListener = new InputListener() {
             @Override
             public void onMapTap(@NonNull Map map, @NonNull Point point) {
@@ -121,6 +123,8 @@ public class MainActivity extends AppCompatActivity{
 
         mapView.getMap().addInputListener(inputListener);
         Log.d("TagOnCreate", "Finish initialization " + userLocation.getLatitude() + " " + userLocation.getLongitude());
+
+        // Перемещение камеры на текущее местоположение
         mapView.getMap().move(
                 new CameraPosition(userLocation, START_ZOOM, 0.0f, 0.0f),
                 new Animation(SMOOTH, 0.3f),
@@ -128,8 +132,8 @@ public class MainActivity extends AppCompatActivity{
         );
     }
 
+    // Изменение положения метки при изменении текущего местоположения
     private final LocationListener locationListener = new LocationListener() {
-
         @Override
         public void onLocationChanged(Location location) {
             userLocation = new Point(location.getLatitude(), location.getLongitude());
@@ -146,6 +150,7 @@ public class MainActivity extends AppCompatActivity{
         public void onStatusChanged(String provider, int status, Bundle extras) {}
     };
 
+    // Получение нового текущего местоположения
     @SuppressLint("MissingPermission")
     @Override
     protected void onResume() {
@@ -317,7 +322,7 @@ public class MainActivity extends AppCompatActivity{
         placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
         placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
         placemark.addTapListener(onMarkerTapListener);
-        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type);
+        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type, LocalDateTime.now());
         markerInfoMap.put(placemark, markerInfo);
     }
 
