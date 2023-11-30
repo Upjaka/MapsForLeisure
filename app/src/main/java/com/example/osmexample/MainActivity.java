@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -25,6 +24,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.ScreenPoint;
@@ -41,7 +42,13 @@ import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.runtime.image.ImageProvider;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity{
@@ -61,6 +68,7 @@ public class MainActivity extends AppCompatActivity{
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
     private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
+    Gson gson = null;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -72,8 +80,6 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         Context context = getApplicationContext();
-
-        setContentView(R.layout.activity_main);
 
         mapView = findViewById(R.id.mapview);
         mainLayout = findViewById(R.id.MainLayout);
@@ -98,6 +104,24 @@ public class MainActivity extends AppCompatActivity{
         locationMarker.setIcon(imageProvider);
         locationMarker.setIconStyle(new IconStyle().setScale(LOCATION_MARKER_SCALE));
         locationMarker.addTapListener(onMarkerTapListener);
+
+        // Загрузка сохраненных маркеров
+        //new File(getFilesDir() + "/markers.json").delete();
+        gson = new Gson();
+        ArrayList<MiniMarkerInfo> markers;
+        try (FileReader reader = new FileReader(getFilesDir() + "/markers.json")) {
+            Type listType = new TypeToken<ArrayList<MiniMarkerInfo>>(){}.getType();
+            markers = gson.fromJson(reader, listType);
+
+        } catch (IOException e) {
+            markers = new ArrayList<>();
+        }
+        String msg = markers.size() + " markers were downloaded from file";
+        for (MiniMarkerInfo markerInfo: markers) {
+            addMarker(new Point(markerInfo.getLatitude(), markerInfo.getLongitude()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.getMarkerType(), markerInfo.getDateTime());
+        }
+        Log.d("JSON", msg);
+
 
         // Обработчик долгого нажатия на карту
         inputListener = new InputListener() {
@@ -178,9 +202,30 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onStop() {
         mapView.onStop();
+
+        // Сохранение JSON в файл
+        new File(getFilesDir() + "/markers.json").delete();
+        ArrayList<MiniMarkerInfo> markers = new ArrayList<>();
+
+        for (MarkerInfo markerInfo: markerInfoMap.values()) {
+            double latitude = markerInfo.getPlacemark().getGeometry().getLatitude();
+            double longitude = markerInfo.getPlacemark().getGeometry().getLongitude();
+            markers.add(new MiniMarkerInfo(latitude, longitude, markerInfo.getName(), markerInfo.getDescription(), markerInfo.getMarkerType(), markerInfo.getDateTime()));
+        }
+
+        String json = gson.toJson(markers);
+        try (FileWriter writer = new FileWriter(getFilesDir() + "/markers.json")) {
+            writer.write(json);
+            Log.d("JSON", markers.size() + " markers are saved");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d("JSON", "Error saving markers");
+        }
+
         MapKitFactory.getInstance().onStop();
         super.onStop();
     }
+
 
     public void onMapCenterButtonClick(View view) {
         float currentZoom = mapView.getMap().getCameraPosition().getZoom();
@@ -264,7 +309,7 @@ public class MainActivity extends AppCompatActivity{
             }
         }
         else {
-            addMarker(point, markerName, markerDescription, markerType);
+            addMarker(point, markerName, markerDescription, markerType, LocalDateTime.now());
         }
         nameView.setText("");
         descriptionView.setText("");
@@ -306,7 +351,7 @@ public class MainActivity extends AppCompatActivity{
         markerInfoPanel.setVisibility(View.INVISIBLE);
     }
 
-    private void addMarker(Point position, String name, String description, MarkerType type) {
+    private void addMarker(Point position, String name, String description, MarkerType type, LocalDateTime dateTime) {
         ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
         if (type == MarkerType.MUSHROOM) {
             imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
@@ -322,7 +367,7 @@ public class MainActivity extends AppCompatActivity{
         placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
         placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
         placemark.addTapListener(onMarkerTapListener);
-        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type, LocalDateTime.now());
+        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type, dateTime);
         markerInfoMap.put(placemark, markerInfo);
     }
 
@@ -352,12 +397,6 @@ public class MainActivity extends AppCompatActivity{
 
     public void onCloseMarkerInfoButtonClicked(View view) {
         markerInfoPanel.setVisibility(View.INVISIBLE);
-    }
-
-    private boolean checkLocationPermission() {
-        int fineLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        int coarseLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        return fineLocationPermission == PackageManager.PERMISSION_GRANTED && coarseLocationPermission == PackageManager.PERMISSION_GRANTED;
     }
 
     // Запрос разрешений на доступ к местоположению
