@@ -4,18 +4,22 @@ import androidx.annotation.NonNull;
 
 import com.yandex.mapkit.map.PlacemarkMapObject;
 
+import java.time.LocalDateTime;
+
 public class MarkerInfo {
     private PlacemarkMapObject placemark;
     private String name;
     private String description;
     private MarkerType markerType;
+    private LocalDateTime dateTime;
 
 
-    public MarkerInfo(PlacemarkMapObject placemark, String name, String description, MarkerType markerType) {
+    public MarkerInfo(PlacemarkMapObject placemark, String name, String description, MarkerType markerType, LocalDateTime dateTime) {
         this.placemark = placemark;
         this.name = name;
         this.description = description;
         this.markerType = markerType;
+        this.dateTime = dateTime;
     }
 
     public MarkerType getMarkerType() {
@@ -44,6 +48,10 @@ public class MarkerInfo {
 
     public PlacemarkMapObject getPlacemark() {
         return placemark;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     @NonNull
