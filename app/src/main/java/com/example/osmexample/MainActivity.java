@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,6 +37,7 @@ import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.ScreenPoint;
 import com.yandex.mapkit.geometry.Point;
+import com.yandex.mapkit.geometry.Polyline;
 import com.yandex.mapkit.map.CameraPosition;
 import com.yandex.mapkit.map.IconStyle;
 import com.yandex.mapkit.map.InputListener;
@@ -44,6 +46,7 @@ import com.yandex.mapkit.map.MapObject;
 import com.yandex.mapkit.map.MapObjectCollection;
 import com.yandex.mapkit.map.MapObjectTapListener;
 import com.yandex.mapkit.map.PlacemarkMapObject;
+import com.yandex.mapkit.map.PolylineMapObject;
 import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.runtime.image.ImageProvider;
@@ -57,6 +60,7 @@ import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
     private final String API_KEY = "1c1210f8-c152-4c8d-96ae-ac504e3662c4";
@@ -78,7 +82,10 @@ public class MainActivity extends AppCompatActivity{
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
     private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
-    Gson gson = null;
+    private Gson gson = null;
+    private boolean isTracking = false;
+    private List<Point> track = null;
+    private List<PolylineMapObject> trackPolylines = null;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -258,8 +265,17 @@ public class MainActivity extends AppCompatActivity{
     private final LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            Point oldLocation = userLocation;
             userLocation = new Point(location.getLatitude(), location.getLongitude());
             locationMarker.setGeometry(userLocation);
+            if (isTracking) {
+                List<Point> list = new ArrayList<>();
+                list.add(oldLocation);
+                list.add(userLocation);
+                PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(list));
+                trackPolylines.add(polyline);
+                track.add(userLocation);
+            }
         }
 
         @Override
@@ -449,8 +465,17 @@ public class MainActivity extends AppCompatActivity{
         markerInfoPanel.setVisibility(View.INVISIBLE);
     }
 
-    public void onTackingButtonClicked(View view) {
+    public void onTrackingButtonClicked(View view) {
         Button trackingButton = findViewById(R.id.trackingButton);
+        if (!isTracking) {
+            track = new ArrayList<>();
+            track.add(userLocation);
+            trackingButton.setBackgroundColor(getResources().getColor(R.color.white));
+        }
+        else {
+            trackingButton.setBackgroundResource(0);
+        }
+        isTracking = !isTracking;
     }
 
     private void addMarker(Point position, String name, String description, MarkerType type, LocalDateTime dateTime) {
