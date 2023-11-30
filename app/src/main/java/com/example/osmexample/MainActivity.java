@@ -1,158 +1,354 @@
 package com.example.osmexample;
 
-import android.app.Activity;
+import static com.yandex.mapkit.Animation.Type.SMOOTH;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.PointF;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.Manifest;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.location.LocationRequest;
+import com.yandex.mapkit.Animation;
+import com.yandex.mapkit.MapKitFactory;
+import com.yandex.mapkit.ScreenPoint;
+import com.yandex.mapkit.geometry.Point;
+import com.yandex.mapkit.map.CameraPosition;
+import com.yandex.mapkit.map.IconStyle;
+import com.yandex.mapkit.map.InputListener;
+import com.yandex.mapkit.map.Map;
+import com.yandex.mapkit.map.MapObject;
+import com.yandex.mapkit.map.MapObjectCollection;
+import com.yandex.mapkit.map.MapObjectTapListener;
+import com.yandex.mapkit.map.PlacemarkMapObject;
+import com.yandex.mapkit.map.TextStyle;
+import com.yandex.mapkit.mapview.MapView;
+import com.yandex.runtime.image.ImageProvider;
 
-import org.osmdroid.bonuspack.routing.OSRMRoadManager;
-import org.osmdroid.bonuspack.routing.Road;
-import org.osmdroid.bonuspack.routing.RoadManager;
-import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.views.overlay.MapEventsOverlay;
+import java.util.HashMap;
 
-import androidx.core.app.ActivityCompat;
+public class MainActivity extends AppCompatActivity{
+    private final String API_KEY = "1c1210f8-c152-4c8d-96ae-ac504e3662c4";
+    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
+    private final float MARKER_SCALE = 0.06f;
+    private final float LOCATION_MARKER_SCALE = 0.14f;
+    private final float START_ZOOM = 14.0f;
+    private MapView mapView = null;
+    private Point userLocation = new Point(0, 0);
+    private PlacemarkMapObject locationMarker = null;
+    private InputListener inputListener = null;
+    private FrameLayout mainLayout = null;
+    private LinearLayout setMarkerLayout = null;
+    private LinearLayout markerInfoPanel = null;
+    private LocationManager locationManager;
+    private MapObjectCollection mapObjects = null;
+    private MapObject clickedMarker = null;
+    private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
 
-import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
-
-import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Polyline;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.IOException;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-public class MainActivity extends Activity implements MapEventsReceiver {
-    MapView map = null;
-    GeoPoint userLocation = null;
-    Gson gson = new Gson();
-    ArrayList<Double[]> markers = null;
-
+    @SuppressLint("MissingPermission")
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MapKitFactory.setApiKey(API_KEY);
+        MapKitFactory.initialize(this);
 
-        Context context = getApplicationContext();
-        Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context));
-
-        //inflate and create the map
         setContentView(R.layout.activity_main);
 
-        map = (MapView) findViewById(R.id.map);
-        map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setScrollableAreaLimitLatitude(
-                MapView.getTileSystem().getMaxLatitude(), MapView.getTileSystem().getMinLatitude(), 0
+        Context context = getApplicationContext();
+
+        setContentView(R.layout.activity_main);
+
+        mapView = findViewById(R.id.mapview);
+        mainLayout = findViewById(R.id.MainLayout);
+        setMarkerLayout = findViewById(R.id.setMarkerLayout);
+        markerInfoPanel = findViewById(R.id.markerInfoPanel);
+
+
+        // Определение местоположения
+        requestLocationPermission();
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location lastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (lastLocation != null) {
+            userLocation = new Point(lastLocation.getLatitude(), lastLocation.getLongitude());
+        }
+
+        // Добавление маркера текущего местоположения
+        markerInfoMap = new HashMap<>();
+        mapObjects = mapView.getMap().getMapObjects().addCollection();
+        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.star);
+        locationMarker = mapObjects.addPlacemark();
+        locationMarker.setGeometry(userLocation);
+        locationMarker.setIcon(imageProvider);
+        locationMarker.setIconStyle(new IconStyle().setScale(LOCATION_MARKER_SCALE));
+        locationMarker.addTapListener(onMarkerTapListener);
+
+        inputListener = new InputListener() {
+            @Override
+            public void onMapTap(@NonNull Map map, @NonNull Point point) {
+
+            }
+
+            @Override
+            public void onMapLongTap(@NonNull Map map, @NonNull Point point) {
+                Toast.makeText(context, "Передвиньте маркер на нужную позицию и нажмите на него", Toast.LENGTH_LONG).show();
+
+                mapView.getMap().move(
+                        new CameraPosition(point, map.getCameraPosition().getZoom(), 0.0f, 0.0f),
+                        new Animation(SMOOTH, 0.3f),
+                        null
+                );
+
+                ImageView centerMarker = findViewById(R.id.centerMarker);
+                centerMarker.setVisibility(View.VISIBLE);
+            }
+        };
+
+        mapView.getMap().addInputListener(inputListener);
+        Log.d("TagOnCreate", "Finish initialization " + userLocation.getLatitude() + " " + userLocation.getLongitude());
+        mapView.getMap().move(
+                new CameraPosition(userLocation, START_ZOOM, 0.0f, 0.0f),
+                new Animation(SMOOTH, 0.3f),
+                null
         );
-
-        map.setMinZoomLevel(3.0);
-        map.getController().setZoom(15);
-        map.setHorizontalMapRepetitionEnabled(true);
-        map.setVerticalMapRepetitionEnabled(false);
-
-        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(this, this);
-        map.getOverlays().add(0, mapEventsOverlay);
-
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Создайте запрос местоположения
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        // Проверьте разрешения
-        if (checkLocationPermission()) {
-            // Разрешения на местоположение уже предоставлены
-
-            // Запросите текущее местоположение
-            fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
-
-                        // Ваш код для обработки полученного местоположения
-                        userLocation = new GeoPoint(latitude, longitude);
-
-                        // Добавление маркера текущего местоположения
-                        addMarker(userLocation, false);
-                    } else {
-                        // Местоположение не доступно, обработайте это соответственно
-                        userLocation = new GeoPoint(58.200897, 68.253976);
-                    }
-                    // Центрируйте карту на местоположении пользователя
-                    map.getController().setCenter(userLocation);
-                }
-            });
-        } else {
-            // Запрос разрешений
-            requestLocationPermission();
-        }
-
-        // Добавление меток на карту
-        try (FileReader reader = new FileReader(getFilesDir() + "/markers.json")) {
-            Type listType = new TypeToken<ArrayList<Double[]>>(){}.getType();
-            markers = gson.fromJson(reader, listType);
-
-        } catch (IOException e) {
-            markers = new ArrayList<>();
-        }
-        String msg = "Data downloaded from file: ";
-        for (Double[] point: markers) {
-            addMarker(new GeoPoint(point[0], point[1]), false);
-            msg = msg + Arrays.toString(point);
-        }
-        Log.d("JSON", msg);
     }
 
-    public void onResume() {
+    private final LocationListener locationListener = new LocationListener() {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            userLocation = new Point(location.getLatitude(), location.getLongitude());
+            locationMarker.setGeometry(userLocation);
+        }
+
+        @Override
+        public void onProviderDisabled(@NonNull String provider) {}
+
+        @Override
+        public void onProviderEnabled(@NonNull String provider) {}
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+    };
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onResume() {
         super.onResume();
-        map.onResume();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                1000 * 2, 2, locationListener);
+        locationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER, 1000 * 2, 2,
+                locationListener);
     }
 
-    public void onPause() {
+    @Override
+    protected void onPause() {
         super.onPause();
-        map.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MapKitFactory.getInstance().onStart();
+        mapView.onStart();
     }
 
     @Override
     protected void onStop() {
+        mapView.onStop();
+        MapKitFactory.getInstance().onStop();
         super.onStop();
+    }
 
-        // Сохранение JSON в файл
-        String json = gson.toJson(markers);
-        try (FileWriter writer = new FileWriter(getFilesDir() + "/markers.json")) {
-            writer.write(json);
-            String msg = "Data saved to file: ";
-            for (Double[] point: markers) {
-                msg = msg + Arrays.toString(point);
+    public void onMapCenterButtonClick(View view) {
+        float currentZoom = mapView.getMap().getCameraPosition().getZoom();
+        mapView.getMap().move(
+                new CameraPosition(userLocation, currentZoom, 0.0f, 0.0f),
+                new Animation(SMOOTH, 0.8f),
+                null
+        );
+    }
+
+    public void onPlusZoomButtonClick(View view) {
+        Point currentPosition = mapView.getMap().getCameraPosition().getTarget();
+        float currentZoom = mapView.getMap().getCameraPosition().getZoom();
+        mapView.getMap().move(
+                new CameraPosition(currentPosition, currentZoom + 1f, 0.0f, 0.0f),
+                new Animation(SMOOTH, 0.3f),
+                null
+        );
+    }
+
+    public void onMinusZoomButtonClick(View view) {
+        Point currentPosition = mapView.getMap().getCameraPosition().getTarget();
+        float currentZoom = mapView.getMap().getCameraPosition().getZoom();
+        mapView.getMap().move(
+                new CameraPosition(currentPosition, currentZoom - 1f, 0.0f, 0.0f),
+                new Animation(SMOOTH, 0.3f),
+                null
+        );
+    }
+
+    public void onCenterMarkerClick(View view) {
+        mainLayout.setVisibility(View.INVISIBLE);
+        findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onSaveMarkerButton(View view) {
+        ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
+                mapView.getMapWindow().height() / 2f);
+        Point point = mapView.getMapWindow().screenToWorld(screenPoint);
+        TextView nameView = findViewById(R.id.editMarkerName);
+        String markerName = nameView.getText().toString();
+        TextView descriptionView = findViewById(R.id.editTextDescription);
+        String markerDescription = descriptionView.getText().toString();
+        MarkerType markerType = MarkerType.DEFAULT;
+        RadioButton mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
+        RadioButton fishRadioButton = findViewById(R.id.fishRadioButton);
+        RadioButton walkRadioButton = findViewById(R.id.walkRadioButton);
+        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
+        if (mushroomRadioButton.isChecked()) {
+            markerType = MarkerType.MUSHROOM;
+            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
+            mushroomRadioButton.setChecked(false);
+        } else if (fishRadioButton.isChecked()) {
+            markerType = MarkerType.FISH;
+            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
+            fishRadioButton.setChecked(false);
+        } else if (walkRadioButton.isChecked()) {
+            markerType = MarkerType.WALK;
+            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
+            walkRadioButton.setChecked(false);
+        }
+        if (markerInfoPanel.getVisibility() == View.VISIBLE) {
+            MarkerInfo markerInfo = markerInfoMap.get(clickedMarker);
+            if (markerInfo != null) {
+                markerInfo.setName(markerName);
+                markerInfo.setDescription(markerDescription);
+                markerInfo.setMarkerType(markerType);
+
+                PlacemarkMapObject placemark = markerInfo.getPlacemark();
+                placemark.setText(markerName);
+
+                placemark.setIcon(imageProvider);
+                placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
+                placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
+
+                TextView textName = findViewById(R.id.markerName);
+                textName.setText(markerInfo.getName());
+                TextView textDescription = findViewById(R.id.markerDescription);
+                textDescription.setText(markerInfo.getDescription());
             }
-            Log.d("JSON", msg);
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        else {
+            addMarker(point, markerName, markerDescription, markerType);
+        }
+        nameView.setText("");
+        descriptionView.setText("");
+        setMarkerLayout.setVisibility(View.INVISIBLE);
+        mainLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onCancelMarkerButton(View view) {
+        setMarkerLayout.setVisibility(View.INVISIBLE);
+        mainLayout.setVisibility(View.VISIBLE);
+        RadioButton mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
+        RadioButton fishRadioButton = findViewById(R.id.fishRadioButton);
+        RadioButton walkRadioButton = findViewById(R.id.walkRadioButton);
+        mushroomRadioButton.setChecked(false);
+        fishRadioButton.setChecked(false);
+        walkRadioButton.setChecked(false);
+    }
+
+    public void onChangeMarkerButtonClicked(View view) {
+        mainLayout.setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
+
+        MarkerInfo markerInfo = markerInfoMap.get(clickedMarker);
+        TextView nameView = findViewById(R.id.editMarkerName);
+        TextView descriptionView = findViewById(R.id.editTextDescription);
+        if (markerInfo == null) {
+            nameView.setText("");
+            descriptionView.setText("");
+        }
+        else {
+            nameView.setText(markerInfo.getName());
+            descriptionView.setText(markerInfo.getDescription());
         }
     }
 
-    // Проверка наличия разрешений на доступ к местоположению
+    public void onDeleteMarkerButtonClicked(View view) {
+        mapObjects.remove(clickedMarker);
+        markerInfoMap.remove(clickedMarker);
+        markerInfoPanel.setVisibility(View.INVISIBLE);
+    }
+
+    private void addMarker(Point position, String name, String description, MarkerType type) {
+        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
+        if (type == MarkerType.MUSHROOM) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
+        } else if (type == MarkerType.FISH) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
+        } else if (type == MarkerType.WALK) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
+        }
+        PlacemarkMapObject placemark = mapObjects.addPlacemark();
+        placemark.setGeometry(position);
+        placemark.setIcon(imageProvider);
+        placemark.setText(name);
+        placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
+        placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
+        placemark.addTapListener(onMarkerTapListener);
+        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type);
+        markerInfoMap.put(placemark, markerInfo);
+    }
+
+    private final MapObjectTapListener onMarkerTapListener = (mapObject, point) -> {
+        float currentZoom = mapView.getMap().getCameraPosition().getZoom();
+        mapView.getMap().move(
+                new CameraPosition(point, currentZoom, 0.0f, 0.0f),
+                new Animation(SMOOTH, 0.3f),
+                null
+        );
+        if (mapObject != locationMarker) {
+            clickedMarker = mapObject;
+            markerInfoPanel.setVisibility(View.VISIBLE);
+            MarkerInfo markerInfo = markerInfoMap.get(mapObject);
+            if (markerInfo == null) {
+                Toast.makeText(getApplicationContext(), "Маркер не найден", Toast.LENGTH_LONG).show();
+            }
+            else {
+                TextView markerName = findViewById(R.id.markerName);
+                markerName.setText(markerInfo.getName());
+                TextView markerDescription = findViewById(R.id.markerDescription);
+                markerDescription.setText(markerInfo.getDescription());
+            }
+        }
+        return false;
+    };
+
+    public void onCloseMarkerInfoButtonClicked(View view) {
+        markerInfoPanel.setVisibility(View.INVISIBLE);
+    }
+
     private boolean checkLocationPermission() {
         int fineLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         int coarseLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -161,59 +357,12 @@ public class MainActivity extends Activity implements MapEventsReceiver {
 
     // Запрос разрешений на доступ к местоположению
     private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 12345);
+        if (ContextCompat.checkSelfPermission(this,
+                "android.permission.ACCESS_FINE_LOCATION")
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{"android.permission.ACCESS_FINE_LOCATION"},
+                    PERMISSIONS_REQUEST_FINE_LOCATION);
+        }
     }
-
-    private void addMarker(GeoPoint markerLocation, boolean addToArray) {
-        Double[] point = {markerLocation.getLatitude(), markerLocation.getLongitude()};
-        if (addToArray) markers.add(point);
-        Marker startMarker = new Marker(map);
-        startMarker.setPosition(markerLocation);
-        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-//        startMarker.setIcon(ResourcesCompat.getDrawable(getResources(),
-//                R.drawable.marker, getApplicationContext().getTheme()));
-        map.getOverlays().add(startMarker);
-        map.invalidate();
-    }
-
-    @Override
-    public boolean singleTapConfirmedHelper(GeoPoint p) {
-        return false;
-    }
-
-    @Override
-    public boolean longPressHelper(GeoPoint p) {
-        addMarker(p, true);
-//        RoadManager roadManager = new OSRMRoadManager(this, "MY_USER_AGENT");
-//        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
-//        waypoints.add(userLocation);
-//        waypoints.add(p);
-//        Road road = roadManager.getRoad(waypoints);
-//        if (road.mStatus != Road.STATUS_OK)
-//            Toast.makeText(this, "Error when loading the road - status=" + road.mStatus, Toast.LENGTH_SHORT).show();
-//
-//        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-//        map.getOverlays().add(roadOverlay);
-        return false;
-    }
-
-    public void onMapCenterButtonClick(View view) {
-        map.getController().setCenter(userLocation);
-    }
-
-    //    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        switch (requestCode) {
-//            case 12345:
-//                if (grantResults.length > 0
-//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // permission granted
-//                    centerMapOnLocation();
-//                } else {
-//                    // permission denied
-//                    map.getController().setCenter(new GeoPoint(58.200897, 68.253976));
-//                }
-//                return;
-//        }
-//    }
 }

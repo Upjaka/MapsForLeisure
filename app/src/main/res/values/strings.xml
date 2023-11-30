@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">OSMexample</string>
+    <string name="CancelButtonText">Отмена</string>
+    <string name="SaveButtonText">Сохранить</string>
+    <string name="DescriptionButtonText">Введите описание</string>
+    <string name="DescriptionLabelText">Описание</string>
+    <string name="WalkRadioButtonText">Для пеших прогулок</string>
+    <string name="FishRadioButtonText">Для рыбаков</string>
+    <string name="MushroomRadioButtonText">Для грибников</string>
+    <string name="MarkerTypeCheckboxText">Дополнительные опции</string>
+    <string name="EditMarkerNameText">Введите название</string>
+    <string name="MarkerNameLabelText">Название</string>
+    <string name="AddNewMarkerTitleText">Новая метка</string>
+    <string name="MarkerInfoMarkerNameText">Имя метки</string>
+    <string name="MarkerInfoChangeButtonText">Изменить</string>
+    <string name="MarkerInfoDeleteButtonText">Удалить</string>
 </resources>
