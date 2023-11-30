@@ -6,7 +6,26 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     tools:context=".MainActivity">
+    <FrameLayout
+        android:id="@+id/loadingScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/forest_background" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="100dp"
+            android:text="@string/LoadingScreenText"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/markerInfoPanel"
         android:layout_width="260dp"
@@ -92,7 +111,8 @@
     <FrameLayout
         android:id="@+id/MainLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="invisible">
 
         <ImageView
             android:id="@+id/myLocationButton"

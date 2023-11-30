@@ -14,4 +14,5 @@
     <string name="MarkerInfoMarkerNameText">Имя метки</string>
     <string name="MarkerInfoChangeButtonText">Изменить</string>
     <string name="MarkerInfoDeleteButtonText">Удалить</string>
+    <string name="LoadingScreenText">Загрузка...</string>
 </resources>
