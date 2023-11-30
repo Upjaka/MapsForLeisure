@@ -17,10 +17,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +53,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -67,6 +72,7 @@ public class MainActivity extends AppCompatActivity{
     private FrameLayout mainLayout = null;
     private LinearLayout setMarkerLayout = null;
     private LinearLayout markerInfoPanel = null;
+    private ListView menu = null;
     private LocationManager locationManager;
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity{
         setMarkerLayout = findViewById(R.id.setMarkerLayout);
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
         loadingScreen = findViewById(R.id.loadingScreen);
+        menu = findViewById(R.id.menu);
 
         // Определение местоположения
         requestLocationPermission();
@@ -158,10 +165,95 @@ public class MainActivity extends AppCompatActivity{
                 null
         );
 
+        // Закрытие загрузочного окна через секунду
         new Handler().postDelayed(() -> {
             loadingScreen.setVisibility(View.GONE);
             mainLayout.setVisibility(View.VISIBLE);
         }, LOADING_SCREEN_TIME_OUT);
+
+        // Создание меню
+        ArrayList<MenuItem> menuItems = new ArrayList<>();
+        menuItems.add(new MenuItem(R.drawable.back, "Закрыть меню"));
+        menuItems.add(new MenuItem(R.drawable.routes, "Мои маршруты"));
+        menuItems.add(new MenuItem(R.drawable.markers, "Мои метки"));
+        menuItems.add(new MenuItem(R.drawable.tracks, "Мои треки"));
+        menuItems.add(new MenuItem(R.drawable.settings, "Настройки"));
+        menuItems.add(new MenuItem(R.drawable.exit, "Выход"));
+
+        MenuAdapter menuAdapter = new MenuAdapter(this, menuItems);
+        menu.setAdapter(menuAdapter);
+        menu.setOnItemClickListener((parent, view, position, id) -> {
+            switch (position) {
+                case 0:
+                    // Действие для "Закрыть меню"
+                    menu.setVisibility(View.GONE);
+                    findViewById(R.id.menuButton).setVisibility(View.VISIBLE);
+                    break;
+                case 1:
+                    // Действие для "Мои маршруты"
+                    break;
+                case 2:
+                    // Действие для "Мои метки"
+                    break;
+                case 3:
+                    // Действие для "Мои треки"
+                    break;
+                case 4:
+                    // Действие для "Настройки"
+                    break;
+                case 5:
+                    // Действие для "Выход"
+                    break;
+            }
+        });
+    }
+
+    public static class MenuItem {
+        private final int imageId;
+        private final String text;
+
+        public MenuItem(int imageId, String text) {
+            this.imageId = imageId;
+            this.text = text;
+        }
+
+        public int getImageId() {
+            return imageId;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+    public static class MenuAdapter extends ArrayAdapter<MenuItem> {
+        private final ArrayList<MenuItem> menuItems;
+        private final Context mContext;
+
+        public MenuAdapter(Context context, ArrayList<MenuItem> items) {
+            super(context, 0, items);
+            mContext = context;
+            menuItems = items;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            View listItem = convertView;
+            if (listItem == null) {
+                listItem = LayoutInflater.from(mContext).inflate(R.layout.item_menu, parent, false);
+            }
+
+            MenuItem currentItem = menuItems.get(position);
+
+            ImageView imageView = listItem.findViewById(R.id.imageView);
+            imageView.setImageResource(currentItem.getImageId());
+
+            TextView textView = listItem.findViewById(R.id.textView);
+            textView.setText(currentItem.getText());
+
+            return listItem;
+        }
     }
 
     // Изменение положения метки при изменении текущего местоположения
@@ -416,5 +508,10 @@ public class MainActivity extends AppCompatActivity{
                     new String[]{"android.permission.ACCESS_FINE_LOCATION"},
                     PERMISSIONS_REQUEST_FINE_LOCATION);
         }
+    }
+
+    public void onMenuButtonClick(View view) {
+        menu.setVisibility(View.VISIBLE);
+        findViewById(R.id.menuButton).setVisibility(View.GONE);
     }
 }
