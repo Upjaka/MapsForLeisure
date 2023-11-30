@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -132,13 +133,10 @@ public class MainActivity extends AppCompatActivity{
         }
         Log.d("JSON", msg);
 
-
         // Обработчик долгого нажатия на карту
         inputListener = new InputListener() {
             @Override
-            public void onMapTap(@NonNull Map map, @NonNull Point point) {
-
-            }
+            public void onMapTap(@NonNull Map map, @NonNull Point point) {}
 
             @Override
             public void onMapLongTap(@NonNull Map map, @NonNull Point point) {
@@ -331,7 +329,7 @@ public class MainActivity extends AppCompatActivity{
         float currentZoom = mapView.getMap().getCameraPosition().getZoom();
         mapView.getMap().move(
                 new CameraPosition(userLocation, currentZoom, 0.0f, 0.0f),
-                new Animation(SMOOTH, 0.8f),
+                new Animation(SMOOTH, 0.5f),
                 null
         );
     }
@@ -449,6 +447,10 @@ public class MainActivity extends AppCompatActivity{
         mapObjects.remove(clickedMarker);
         markerInfoMap.remove(clickedMarker);
         markerInfoPanel.setVisibility(View.INVISIBLE);
+    }
+
+    public void onTackingButtonClicked(View view) {
+        Button trackingButton = findViewById(R.id.trackingButton);
     }
 
     private void addMarker(Point position, String name, String description, MarkerType type, LocalDateTime dateTime) {

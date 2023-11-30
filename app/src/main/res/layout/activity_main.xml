@@ -127,13 +127,48 @@
             android:src="@drawable/menu"
             android:translationZ="2dp" />
 
+        <Button
+            android:id="@+id/trackingButton"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:alpha="0.75"
+            android:backgroundTint="#FFFFFF"
+            android:text="Запись трека"
+
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:translationX="170dp"
+            android:translationY="670dp"
+            app:icon="@drawable/tracking"
+            app:iconGravity="start"
+            app:iconPadding="1dp"
+            app:iconSize="40dp"
+            app:iconTint="#000000" />
+
+        <Button
+            android:id="@+id/routingButton"
+            android:layout_width="145dp"
+            android:layout_height="50dp"
+            android:alpha="0.75"
+            android:backgroundTint="#FFFFFF"
+            android:text="Найти маршрут"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:translationX="15dp"
+            android:translationY="670dp"
+            app:icon="@drawable/routing"
+            app:iconGravity="start"
+            app:iconPadding="1dp"
+            app:iconSize="40dp"
+            app:iconTint="#000000" />
+
         <ListView
             android:id="@+id/menu"
             android:layout_width="280dp"
             android:layout_height="match_parent"
             android:background="#FFF8E1"
-            android:visibility="gone"
-            android:translationZ="2dp"/>
+            android:translationZ="2dp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/myLocationButton"
