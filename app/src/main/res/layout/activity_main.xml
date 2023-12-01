@@ -28,6 +28,7 @@
             android:textSize="32sp"
             android:textStyle="bold" />
     </FrameLayout>
+
     <LinearLayout
         android:id="@+id/markerInfoPanel"
         android:layout_width="260dp"
@@ -55,8 +56,8 @@
 
             <ImageView
                 android:id="@+id/closeMarkerInfoButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_weight="1"
                 android:onClick="onCloseMarkerInfoButtonClicked"
                 android:src="@drawable/close"
@@ -95,7 +96,8 @@
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
                 android:onClick="onChangeMarkerButtonClicked"
-                android:text="@string/MarkerInfoChangeButtonText" />
+                android:text="@string/MarkerInfoChangeButtonText"
+                android:textSize="13sp" />
 
             <Button
                 android:id="@+id/buttonDelete"
@@ -127,13 +129,49 @@
             android:src="@drawable/menu"
             android:translationZ="2dp" />
 
+        <Button
+            android:id="@+id/trackingButton"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:alpha="0.75"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="onTrackingButtonClicked"
+            android:text="Запись трека"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:translationX="170dp"
+            android:translationY="690dp"
+            app:icon="@drawable/tracking"
+            app:iconGravity="start"
+            app:iconPadding="1dp"
+            app:iconSize="40dp"
+            app:iconTint="#000000" />
+
+        <Button
+            android:id="@+id/routingButton"
+            android:layout_width="145dp"
+            android:layout_height="50dp"
+            android:alpha="0.75"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="onRouteButtonClicked"
+            android:text="Найти маршрут"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:translationX="15dp"
+            android:translationY="690dp"
+            app:icon="@drawable/routing"
+            app:iconGravity="start"
+            app:iconPadding="1dp"
+            app:iconSize="40dp"
+            app:iconTint="#000000" />
+
         <ListView
             android:id="@+id/menu"
             android:layout_width="280dp"
             android:layout_height="match_parent"
             android:background="#FFF8E1"
-            android:visibility="gone"
-            android:translationZ="2dp"/>
+            android:translationZ="2dp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/myLocationButton"
