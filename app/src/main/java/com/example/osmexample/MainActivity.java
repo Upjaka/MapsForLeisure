@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.content.res.ColorStateList;
 import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,6 +35,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
+import com.yandex.mapkit.RequestPoint;
+import com.yandex.mapkit.RequestPointType;
 import com.yandex.mapkit.ScreenPoint;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.geometry.Polyline;
@@ -49,6 +51,12 @@ import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.map.PolylineMapObject;
 import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
+import com.yandex.mapkit.transport.TransportFactory;
+import com.yandex.mapkit.transport.masstransit.PedestrianRouter;
+import com.yandex.mapkit.transport.masstransit.Route;
+import com.yandex.mapkit.transport.masstransit.Session;
+import com.yandex.mapkit.transport.masstransit.TimeOptions;
+import com.yandex.runtime.Error;
 import com.yandex.runtime.image.ImageProvider;
 
 import java.io.File;
@@ -81,11 +89,15 @@ public class MainActivity extends AppCompatActivity{
     private LocationManager locationManager;
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
+    private ImageView centerMarker = null;
     private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
     private Gson gson = null;
     private boolean isTracking = false;
     private List<Point> track = null;
     private List<PolylineMapObject> trackPolylines = null;
+    private List<PolylineMapObject> routePolylines = null;
+    private PedestrianRouter pedestrianRouter = null;
+
 
     @SuppressLint("MissingPermission")
     @Override
@@ -104,6 +116,7 @@ public class MainActivity extends AppCompatActivity{
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
         loadingScreen = findViewById(R.id.loadingScreen);
         menu = findViewById(R.id.menu);
+        centerMarker = findViewById(R.id.centerMarker);
 
         // Определение местоположения
         requestLocationPermission();
@@ -140,6 +153,10 @@ public class MainActivity extends AppCompatActivity{
         }
         Log.d("JSON", msg);
 
+        // Построитель маршрутов
+        pedestrianRouter = TransportFactory.getInstance().createPedestrianRouter();
+
+
         // Обработчик долгого нажатия на карту
         inputListener = new InputListener() {
             @Override
@@ -155,8 +172,9 @@ public class MainActivity extends AppCompatActivity{
                         null
                 );
 
-                ImageView centerMarker = findViewById(R.id.centerMarker);
                 centerMarker.setVisibility(View.VISIBLE);
+                centerMarker.setOnClickListener(null);
+                centerMarker.setOnClickListener(v -> onCenterMarkerClick(v));
             }
         };
 
@@ -372,7 +390,7 @@ public class MainActivity extends AppCompatActivity{
 
     public void onCenterMarkerClick(View view) {
         mainLayout.setVisibility(View.INVISIBLE);
-        findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
+        centerMarker.setVisibility(View.INVISIBLE);
         setMarkerLayout.setVisibility(View.VISIBLE);
     }
 
@@ -468,14 +486,50 @@ public class MainActivity extends AppCompatActivity{
     public void onTrackingButtonClicked(View view) {
         Button trackingButton = findViewById(R.id.trackingButton);
         if (!isTracking) {
+            trackPolylines = new ArrayList<>();
             track = new ArrayList<>();
             track.add(userLocation);
-            trackingButton.setBackgroundColor(getResources().getColor(R.color.white));
+            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green)));
         }
         else {
-            trackingButton.setBackgroundResource(0);
+            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
         }
         isTracking = !isTracking;
+    }
+
+    public void onRouteButtonClicked(View view) {
+        Toast.makeText(getApplicationContext(), "Поставьте маркер на место, куда прокладываем маршрут", Toast.LENGTH_LONG).show();
+
+        centerMarker.setVisibility(View.VISIBLE);
+        centerMarker.setOnClickListener(null);
+        centerMarker.setOnClickListener(this::onConfirmRouteMarkerClicked);
+    }
+
+    public void onConfirmRouteMarkerClicked(View v) {
+        ArrayList<RequestPoint> requestPoints = new ArrayList<>();
+        ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
+                mapView.getMapWindow().height() / 2f);
+        Point destinationPoint = mapView.getMapWindow().screenToWorld(screenPoint);
+        addMarker(destinationPoint, "", "", MarkerType.DEFAULT, LocalDateTime.now());
+        requestPoints.add(new RequestPoint(userLocation, RequestPointType.WAYPOINT, null, null));
+        requestPoints.add(new RequestPoint(destinationPoint, RequestPointType.WAYPOINT, null, null));
+        TimeOptions timeOptions = new TimeOptions();
+        Session.RouteListener routeListener = new Session.RouteListener() {
+            @Override
+            public void onMasstransitRoutes(@NonNull List<Route> list) {
+                routePolylines = new ArrayList<>();
+                PolylineMapObject polyline = mapObjects.addPolyline(list.get(0).getGeometry());
+                routePolylines.add(polyline);
+            }
+
+            @Override
+            public void onMasstransitRoutesError(@NonNull Error error) {
+                Toast.makeText(getApplicationContext(), "Ошибка построения маршрута", Toast.LENGTH_LONG).show();
+            }
+        };
+        pedestrianRouter.requestRoutes(requestPoints, timeOptions, routeListener);
+        centerMarker.setOnClickListener(null);
+        centerMarker.setVisibility(View.INVISIBLE);
     }
 
     private void addMarker(Point position, String name, String description, MarkerType type, LocalDateTime dateTime) {

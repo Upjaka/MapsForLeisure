@@ -1,6 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.OSMexample" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
+    <style name="Base.Theme.OSMexample" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorOnPrimary">@color/black</item>
+    </style>
+
 
     <style name="Theme.OSMexample" parent="Base.Theme.OSMexample" />
 </resources>
