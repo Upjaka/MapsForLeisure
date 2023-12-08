@@ -2,11 +2,7 @@ package com.example.osmexample.model;
 
 import android.util.Log;
 
-import com.example.osmexample.presenter.MarkerInfo;
-import com.example.osmexample.presenter.RouteInfo;
 import com.google.gson.reflect.TypeToken;
-import com.yandex.mapkit.geometry.Point;
-import com.yandex.mapkit.map.MapObject;
 
 import com.google.gson.Gson;
 
@@ -17,20 +13,13 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class FileManager {
 
-    public static void saveMarkerListToFile(Map<MapObject, MarkerInfo> markerInfoMap, String filesDir) {
+    public static void saveMarkerListToFile(Set<MarkerInfo> markers, String filesDir) {
         Gson gson = new Gson();
         new File(filesDir + "/markers.json").delete();
-        ArrayList<MiniMarkerInfo> markers = new ArrayList<>();
-
-        for (MarkerInfo markerInfo: markerInfoMap.values()) {
-            double latitude = markerInfo.getPlacemark().getGeometry().getLatitude();
-            double longitude = markerInfo.getPlacemark().getGeometry().getLongitude();
-            markers.add(new MiniMarkerInfo(markerInfo.getPlacemark().getGeometry(), markerInfo.getName(), markerInfo.getDescription(), markerInfo.getMarkerType(), markerInfo.getDateTime()));
-        }
 
         String json = gson.toJson(markers);
         try (FileWriter writer = new FileWriter(filesDir + "/markers.json")) {
@@ -42,12 +31,12 @@ public class FileManager {
         }
     }
 
-    public static List<MiniMarkerInfo> loadMarkersFromFile(String filesDir) {
-        //new File(filesDir + "/markers.json").delete();
+    public static List<MarkerInfo> loadMarkersFromFile(String filesDir) {
+        new File(filesDir + "/markers.json").delete();
         Gson gson = new Gson();
-        ArrayList<MiniMarkerInfo> markers;
+        ArrayList<MarkerInfo> markers;
         try (FileReader reader = new FileReader(filesDir + "/markers.json")) {
-            Type listType = new TypeToken<ArrayList<MiniMarkerInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<MarkerInfo>>(){}.getType();
             markers = gson.fromJson(reader, listType);
 
         } catch (IOException e) {
@@ -58,15 +47,9 @@ public class FileManager {
         return markers;
     }
 
-    public static void saveRouteListToFile(Map<MapObject, RouteInfo> routeInfoMap, String filesDir) {
+    public static void saveRouteListToFile(Set<RouteInfo> routes, String filesDir) {
         Gson gson = new Gson();
         new File(filesDir + "/routes.json").delete();
-        ArrayList<MiniRouteInfo> routes = new ArrayList<>();
-
-        for (RouteInfo routeInfo: routeInfoMap.values()) {
-            List<Point> points = routeInfo.getPolyline().getGeometry().getPoints();
-            routes.add(new MiniRouteInfo(points, routeInfo.getName(), routeInfo.getDescription(), routeInfo.getRouteType(), routeInfo.getDateTime()));
-        }
 
         String json = gson.toJson(routes);
         try (FileWriter writer = new FileWriter(filesDir + "/routes.json")) {
@@ -78,12 +61,12 @@ public class FileManager {
         }
     }
 
-    public static List<MiniRouteInfo> loadRoutesFromFile(String filesDir) {
+    public static List<RouteInfo> loadRoutesFromFile(String filesDir) {
         //new File(getFilesDir() + "/routes.json").delete();
         Gson gson = new Gson();
-        ArrayList<MiniRouteInfo> routes;
+        ArrayList<RouteInfo> routes;
         try (FileReader reader = new FileReader(filesDir + "/routes.json")) {
-            Type listType = new TypeToken<ArrayList<MiniRouteInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<RouteInfo>>(){}.getType();
             routes = gson.fromJson(reader, listType);
 
         } catch (IOException e) {
@@ -94,15 +77,9 @@ public class FileManager {
         return routes;
     }
 
-    public static void saveTracksToFile(Map<MapObject, RouteInfo> trackInfoMap, String filesDir) {
+    public static void saveTracksToFile(Set<RouteInfo> tracks, String filesDir) {
         Gson gson = new Gson();
         new File(filesDir + "/tracks.json").delete();
-        ArrayList<MiniRouteInfo> tracks = new ArrayList<>();
-
-        for (RouteInfo routeInfo: trackInfoMap.values()) {
-            List<Point> points = routeInfo.getPolyline().getGeometry().getPoints();
-            tracks.add(new MiniRouteInfo(points, routeInfo.getName(), routeInfo.getDescription(), routeInfo.getRouteType(), routeInfo.getDateTime()));
-        }
 
         String json = gson.toJson(tracks);
         try (FileWriter writer = new FileWriter(filesDir + "/tracks.json")) {
@@ -114,12 +91,12 @@ public class FileManager {
         }
     }
 
-    public static List<MiniRouteInfo> loadTracksFromFile(String filesDir) {
+    public static List<RouteInfo> loadTracksFromFile(String filesDir) {
         //new File(getFilesDir() + "/tracks.json").delete();
         Gson gson = new Gson();
-        ArrayList<MiniRouteInfo> tracks;
+        ArrayList<RouteInfo> tracks;
         try (FileReader reader = new FileReader(filesDir + "/trracks.json")) {
-            Type listType = new TypeToken<ArrayList<MiniRouteInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<RouteInfo>>(){}.getType();
             tracks = gson.fromJson(reader, listType);
 
         } catch (IOException e) {

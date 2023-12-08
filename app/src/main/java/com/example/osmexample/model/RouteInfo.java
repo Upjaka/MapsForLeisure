@@ -5,7 +5,7 @@ import com.yandex.mapkit.geometry.Point;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class MiniRouteInfo {
+public class RouteInfo {
     private List<Point> points;
     private final String name;
     private final String description;
@@ -13,11 +13,11 @@ public class MiniRouteInfo {
     private final LocalDateTime dateTime;
 
 
-    public MiniRouteInfo(List<Point> points, String name, String description, ObjectType markerType, LocalDateTime dateTime) {
+    public RouteInfo(List<Point> points, String name, String description, ObjectType routeType, LocalDateTime dateTime) {
         this.points = points;
         this.name = name;
         this.description = description;
-        this.markerType = markerType;
+        this.markerType = routeType;
         this.dateTime = dateTime;
     }
 

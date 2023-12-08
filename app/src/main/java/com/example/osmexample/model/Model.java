@@ -1,47 +1,52 @@
 package com.example.osmexample.model;
 
-import com.example.osmexample.presenter.MarkerInfo;
-import com.example.osmexample.presenter.RouteInfo;
-import com.example.osmexample.presenter.TrackInfo;
-import com.yandex.mapkit.map.MapObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public class Model {
-    private final List<MiniMarkerInfo> markerList;
-    private final List<MiniRouteInfo> routeList;
-    private final List<MiniRouteInfo> trackList;
+    private final String filesDir;
+    private final Set<MarkerInfo> markerList;
+    private final Set<RouteInfo> routeList;
+    private final Set<RouteInfo> trackList;
 
 
-    public Model() {
-        markerList = new ArrayList<>();
-        routeList = new ArrayList<>();
-        trackList = new ArrayList<>();
+    public Model(String filesDir) {
+        this.filesDir = filesDir;
+        markerList = new HashSet<>();
+        routeList = new HashSet<>();
+        trackList = new HashSet<>();
 
     }
 
-    public List<MiniMarkerInfo> getMarkerList() {
-        return markerList;
+    public List<MarkerInfo> getMarkerList() {
+        return new ArrayList<>(markerList);
     }
 
-    public List<MiniRouteInfo> getRouteList() {
-        return routeList;
+    public List<RouteInfo> getRouteList() {
+        return new ArrayList<>(routeList);
     }
 
-    public List<MiniRouteInfo> getTrackList() {
-        return trackList;
+    public List<RouteInfo> getTrackList() {
+        return new ArrayList<>(trackList);
     }
 
-    public void saveDataToFiles(String filesDir) {
-//        FileManager.saveMarkerListToFile(markerList, filesDir);
-//        FileManager.saveRouteListToFile(routeList, filesDir);
-//        FileManager.saveTracksToFile(trackList, filesDir);
+    public void addMarker(MarkerInfo markerInfo) {
+        markerList.add(markerInfo);
     }
 
-    public void loadDataFromFiles(String filesDir) {
+    public void removeMarker(MarkerInfo markerInfo) {
+        markerList.remove(markerInfo);
+    }
+
+    public void saveDataToFiles() {
+        FileManager.saveMarkerListToFile(markerList, filesDir);
+        FileManager.saveRouteListToFile(routeList, filesDir);
+        FileManager.saveTracksToFile(trackList, filesDir);
+    }
+
+    public void loadDataFromFiles() {
         markerList.addAll(FileManager.loadMarkersFromFile(filesDir));
         routeList.addAll(FileManager.loadRoutesFromFile(filesDir));
         trackList.addAll(FileManager.loadTracksFromFile(filesDir));

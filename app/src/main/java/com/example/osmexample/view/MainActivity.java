@@ -31,13 +31,11 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.osmexample.model.FileManager;
-import com.example.osmexample.presenter.MarkerInfo;
-import com.example.osmexample.model.MiniMarkerInfo;
+import com.example.osmexample.presenter.Marker;
+import com.example.osmexample.model.MarkerInfo;
 import com.example.osmexample.model.ObjectType;
 import com.example.osmexample.R;
-import com.example.osmexample.presenter.RouteInfo;
-import com.example.osmexample.presenter.TrackInfo;
+import com.example.osmexample.presenter.Presenter;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.RequestPoint;
@@ -58,7 +56,6 @@ import com.yandex.mapkit.map.TextStyle;
 import com.yandex.mapkit.mapview.MapView;
 import com.yandex.mapkit.transport.TransportFactory;
 import com.yandex.mapkit.transport.masstransit.PedestrianRouter;
-import com.yandex.mapkit.transport.masstransit.Route;
 import com.yandex.mapkit.transport.masstransit.Session;
 import com.yandex.mapkit.transport.masstransit.TimeOptions;
 import com.yandex.runtime.Error;
@@ -77,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private final float MARKER_SCALE = 0.06f;
     private final float LOCATION_MARKER_SCALE = 0.14f;
     private final float START_ZOOM = 14.0f;
+    private Presenter presenter = null;
     private MapView mapView = null;
     private Point userLocation = new Point(0, 0);
     private PlacemarkMapObject locationMarker = null;
@@ -89,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
     private ImageView centerMarker = null;
-    private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
-    private java.util.Map<MapObject, TrackInfo> trackInfoMap = null;
-    private java.util.Map<MapObject, RouteInfo> routeInfoMap = null;
     private boolean isTracking = false;
     private List<Point> track = null;
     private List<PolylineMapObject> trackPolylines = null;
@@ -107,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
         MapKitFactory.initialize(this);
 
         setContentView(R.layout.activity_main);
+
+        // Инициализация компонентов модели и представителя
+        presenter = new Presenter(getFilesDir().getAbsolutePath());
 
         // Инициализация компонентов карты
         mapView = findViewById(R.id.mapview);
@@ -125,18 +123,14 @@ public class MainActivity extends AppCompatActivity {
             userLocation = new Point(lastLocation.getLatitude(), lastLocation.getLongitude());
         }
 
-        // Инициализация списков маркеров, маршрутов и треков
-        markerInfoMap = new HashMap<>();
-        routeInfoMap = new HashMap<>();
-        trackInfoMap = new HashMap<>();
-
         // Добавление маркера текущего местоположения
         addCurrentLocationMarker();
 
         // Загрузка сохраненных маркеров
-        List<MiniMarkerInfo> markers = FileManager.loadMarkersFromFile(getFilesDir().getAbsolutePath());
-        for (MiniMarkerInfo markerInfo : markers) {
-            addMarker(markerInfo.getPoint(), markerInfo.getName(), markerInfo.getDescription(), markerInfo.getMarkerType(), markerInfo.getDateTime());
+        presenter.loadData();
+        List<MarkerInfo> markerInfos = presenter.getMarkerList();
+        for (MarkerInfo markerInfo : markerInfos) {
+            drawMarker(markerInfo);
         }
 //        // Загрузка сохраненных маршрутов
 //        List<MiniRouteInfo> routes = FileManager.loadRoutesFromFile(getFilesDir().getAbsolutePath());
@@ -295,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         mapView.onStop();
 
         // Сохранение JSON в файл
-        FileManager.saveMarkerListToFile(markerInfoMap, getFilesDir().getAbsolutePath());
+        presenter.saveData();
 
         MapKitFactory.getInstance().onStop();
         super.onStop();
@@ -310,8 +304,26 @@ public class MainActivity extends AppCompatActivity {
         locationMarker.setIconStyle(new IconStyle().setScale(LOCATION_MARKER_SCALE));
         locationMarker.addTapListener(onMarkerTapListener);
     }
-
-    private void addMarker(Point position, String name, String description, ObjectType type, LocalDateTime dateTime) {
+    private void drawMarker(MarkerInfo markerInfo) {
+        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
+        if (markerInfo.getMarkerType() == ObjectType.MUSHROOM) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
+        } else if (markerInfo.getMarkerType() == ObjectType.FISH) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
+        } else if (markerInfo.getMarkerType() == ObjectType.WALK) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
+        }
+        PlacemarkMapObject placemark = mapObjects.addPlacemark();
+        placemark.setGeometry(markerInfo.getPoint());
+        placemark.setIcon(imageProvider);
+        placemark.setText(markerInfo.getName());
+        placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
+        placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
+        placemark.addTapListener(onMarkerTapListener);
+        Marker marker = new Marker(placemark, markerInfo);
+        presenter.addMarker(marker);
+    }
+    private void drawMarker(Point position, String name, String description, ObjectType type, LocalDateTime dateTime) {
         ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
         if (type == ObjectType.MUSHROOM) {
             imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
@@ -327,8 +339,7 @@ public class MainActivity extends AppCompatActivity {
         placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
         placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
         placemark.addTapListener(onMarkerTapListener);
-        MarkerInfo markerInfo = new MarkerInfo(placemark, name, description, type, dateTime);
-        markerInfoMap.put(placemark, markerInfo);
+        presenter.addMarker(placemark, name, description, type, dateTime);
     }
 
     public void onMapCenterButtonClick(View view) {
@@ -393,13 +404,13 @@ public class MainActivity extends AppCompatActivity {
             walkRadioButton.setChecked(false);
         }
         if (markerInfoPanel.getVisibility() == View.VISIBLE) {
-            MarkerInfo markerInfo = markerInfoMap.get(clickedMarker);
-            if (markerInfo != null) {
-                markerInfo.setName(markerName);
-                markerInfo.setDescription(markerDescription);
-                markerInfo.setMarkerType(markerType);
+            Marker marker = presenter.getMarker(clickedMarker);
+            if (marker != null) {
+                marker.setName(markerName);
+                marker.setDescription(markerDescription);
+                marker.setMarkerType(markerType);
 
-                PlacemarkMapObject placemark = markerInfo.getPlacemark();
+                PlacemarkMapObject placemark = marker.getPlacemark();
                 placemark.setText(markerName);
 
                 placemark.setIcon(imageProvider);
@@ -407,12 +418,12 @@ public class MainActivity extends AppCompatActivity {
                 placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
 
                 TextView textName = findViewById(R.id.markerName);
-                textName.setText(markerInfo.getName());
+                textName.setText(marker.getName());
                 TextView textDescription = findViewById(R.id.markerDescription);
-                textDescription.setText(markerInfo.getDescription());
+                textDescription.setText(marker.getDescription());
             }
         } else {
-            addMarker(point, markerName, markerDescription, markerType, LocalDateTime.now());
+            drawMarker(point, markerName, markerDescription, markerType, LocalDateTime.now());
         }
         nameView.setText("");
         descriptionView.setText("");
@@ -435,21 +446,21 @@ public class MainActivity extends AppCompatActivity {
         mainLayout.setVisibility(View.INVISIBLE);
         setMarkerLayout.setVisibility(View.VISIBLE);
 
-        MarkerInfo markerInfo = markerInfoMap.get(clickedMarker);
+        Marker marker = presenter.getMarker(clickedMarker);
         TextView nameView = findViewById(R.id.editMarkerName);
         TextView descriptionView = findViewById(R.id.editTextDescription);
-        if (markerInfo == null) {
+        if (marker == null) {
             nameView.setText("");
             descriptionView.setText("");
         } else {
-            nameView.setText(markerInfo.getName());
-            descriptionView.setText(markerInfo.getDescription());
+            nameView.setText(marker.getName());
+            descriptionView.setText(marker.getDescription());
         }
     }
 
     public void onDeleteMarkerButtonClicked(View view) {
         mapObjects.remove(clickedMarker);
-        markerInfoMap.remove(clickedMarker);
+        presenter.removeMarker(clickedMarker);
         markerInfoPanel.setVisibility(View.INVISIBLE);
     }
 
@@ -479,13 +490,13 @@ public class MainActivity extends AppCompatActivity {
         ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
                 mapView.getMapWindow().height() / 2f);
         Point destinationPoint = mapView.getMapWindow().screenToWorld(screenPoint);
-        addMarker(destinationPoint, "", "", ObjectType.DEFAULT, LocalDateTime.now());
+        drawMarker(destinationPoint, "", "", ObjectType.DEFAULT, LocalDateTime.now());
         requestPoints.add(new RequestPoint(userLocation, RequestPointType.WAYPOINT, null, null));
         requestPoints.add(new RequestPoint(destinationPoint, RequestPointType.WAYPOINT, null, null));
         TimeOptions timeOptions = new TimeOptions();
         Session.RouteListener routeListener = new Session.RouteListener() {
             @Override
-            public void onMasstransitRoutes(@NonNull List<Route> list) {
+            public void onMasstransitRoutes(@NonNull List<com.yandex.mapkit.transport.masstransit.Route> list) {
                 routePolylines = new ArrayList<>();
                 PolylineMapObject polyline = mapObjects.addPolyline(list.get(0).getGeometry());
                 routePolylines.add(polyline);
@@ -511,14 +522,14 @@ public class MainActivity extends AppCompatActivity {
         if (mapObject != locationMarker) {
             clickedMarker = mapObject;
             markerInfoPanel.setVisibility(View.VISIBLE);
-            MarkerInfo markerInfo = markerInfoMap.get(mapObject);
-            if (markerInfo == null) {
+            Marker marker = presenter.getMarker(mapObject);
+            if (marker == null) {
                 Toast.makeText(getApplicationContext(), "Маркер не найден", Toast.LENGTH_LONG).show();
             } else {
                 TextView markerName = findViewById(R.id.markerName);
-                markerName.setText(markerInfo.getName());
+                markerName.setText(marker.getName());
                 TextView markerDescription = findViewById(R.id.markerDescription);
-                markerDescription.setText(markerInfo.getDescription());
+                markerDescription.setText(marker.getDescription());
             }
         }
         return false;
