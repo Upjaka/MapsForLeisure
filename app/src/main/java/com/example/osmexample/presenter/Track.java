@@ -9,42 +9,36 @@ import java.time.LocalDateTime;
 
 public class Track {
     private final PolylineMapObject polyline;
-    private String name;
-    private String description;
-    private ObjectType trackType;
-    private final LocalDateTime dateTime;
+    private final RouteInfo trackInfo;
 
 
-    public Track(PolylineMapObject polyline, String name, String description, ObjectType trackType, LocalDateTime dateTime) {
+    public Track(PolylineMapObject polyline, RouteInfo trackInfo) {
         this.polyline = polyline;
-        this.name = name;
-        this.description = description;
-        this.trackType = trackType;
-        this.dateTime = dateTime;
+        this.trackInfo = trackInfo;
     }
 
-    public ObjectType getTrackType() {
-        return trackType;
+    public ObjectType getRouteType() {
+        return trackInfo.getRouteType();
     }
 
-    public void setTrackType(ObjectType trackType) {
-        this.trackType = trackType;
+    public void setRouteType(ObjectType routeType) {
+        trackInfo.setRouteType(routeType);
     }
 
     public String getName() {
-        return name;
+        return trackInfo.getName();
     }
 
     public void setName(String name) {
-        this.name = name;
+        trackInfo.setName(name);
     }
 
     public String getDescription() {
-        return description;
+        return trackInfo.getDescription();
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        trackInfo.setDescription(description);
     }
 
     public PolylineMapObject getPolyline() {
@@ -52,17 +46,17 @@ public class Track {
     }
 
     public LocalDateTime getDateTime() {
-        return dateTime;
+        return trackInfo.getDateTime();
     }
 
     public RouteInfo getTrackInfo() {
-        return new RouteInfo(polyline.getGeometry().getPoints(), name, description, trackType, dateTime);
+        return trackInfo;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return this.name + " " + polyline.getGeometry().getPoints();
+        return this.trackInfo.getName() + " " + polyline.getGeometry().getPoints();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.example.osmexample.presenter;
 
 import androidx.annotation.NonNull;
 
-import com.example.osmexample.model.MarkerInfo;
 import com.example.osmexample.model.RouteInfo;
 import com.example.osmexample.model.ObjectType;
 import com.yandex.mapkit.map.PolylineMapObject;
@@ -10,42 +9,36 @@ import java.time.LocalDateTime;
 
 public class Route {
     private final PolylineMapObject polyline;
-    private String name;
-    private String description;
-    private ObjectType routeType;
-    private final LocalDateTime dateTime;
+    private final RouteInfo routeInfo;
 
 
-    public Route(PolylineMapObject polyline, String name, String description, ObjectType routeType, LocalDateTime dateTime) {
+    public Route(PolylineMapObject polyline, RouteInfo routeInfo) {
         this.polyline = polyline;
-        this.name = name;
-        this.description = description;
-        this.routeType = routeType;
-        this.dateTime = dateTime;
+        this.routeInfo = routeInfo;
     }
 
     public ObjectType getRouteType() {
-        return routeType;
+        return routeInfo.getRouteType();
     }
 
     public void setRouteType(ObjectType routeType) {
-        this.routeType = routeType;
+        routeInfo.setRouteType(routeType);
     }
 
     public String getName() {
-        return name;
+        return routeInfo.getName();
     }
 
     public void setName(String name) {
-        this.name = name;
+        routeInfo.setName(name);
     }
 
     public String getDescription() {
-        return description;
+        return routeInfo.getDescription();
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        routeInfo.setDescription(description);
     }
 
     public PolylineMapObject getPolyline() {
@@ -53,17 +46,17 @@ public class Route {
     }
 
     public LocalDateTime getDateTime() {
-        return dateTime;
+        return routeInfo.getDateTime();
     }
 
     public RouteInfo getRouteInfo() {
-        return new RouteInfo(polyline.getGeometry().getPoints(), name, description, routeType, dateTime);
+        return routeInfo;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return this.name + " " + polyline.getGeometry().getPoints();
+        return this.routeInfo.getName() + " " + polyline.getGeometry().getPoints();
     }
 
     @Override

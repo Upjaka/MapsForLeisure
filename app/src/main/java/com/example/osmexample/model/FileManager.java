@@ -32,11 +32,12 @@ public class FileManager {
     }
 
     public static List<MarkerInfo> loadMarkersFromFile(String filesDir) {
-        new File(filesDir + "/markers.json").delete();
+        //new File(filesDir + "/markers.json").delete();
         Gson gson = new Gson();
         ArrayList<MarkerInfo> markers;
         try (FileReader reader = new FileReader(filesDir + "/markers.json")) {
-            Type listType = new TypeToken<ArrayList<MarkerInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<MarkerInfo>>() {
+            }.getType();
             markers = gson.fromJson(reader, listType);
 
         } catch (IOException e) {
@@ -66,7 +67,8 @@ public class FileManager {
         Gson gson = new Gson();
         ArrayList<RouteInfo> routes;
         try (FileReader reader = new FileReader(filesDir + "/routes.json")) {
-            Type listType = new TypeToken<ArrayList<RouteInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<RouteInfo>>() {
+            }.getType();
             routes = gson.fromJson(reader, listType);
 
         } catch (IOException e) {
@@ -96,7 +98,8 @@ public class FileManager {
         Gson gson = new Gson();
         ArrayList<RouteInfo> tracks;
         try (FileReader reader = new FileReader(filesDir + "/trracks.json")) {
-            Type listType = new TypeToken<ArrayList<RouteInfo>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<RouteInfo>>() {
+            }.getType();
             tracks = gson.fromJson(reader, listType);
 
         } catch (IOException e) {

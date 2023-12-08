@@ -304,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
         locationMarker.setIconStyle(new IconStyle().setScale(LOCATION_MARKER_SCALE));
         locationMarker.addTapListener(onMarkerTapListener);
     }
+
     private void drawMarker(MarkerInfo markerInfo) {
         ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
         if (markerInfo.getMarkerType() == ObjectType.MUSHROOM) {
@@ -323,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
         Marker marker = new Marker(placemark, markerInfo);
         presenter.addMarker(marker);
     }
+
     private void drawMarker(Point position, String name, String description, ObjectType type, LocalDateTime dateTime) {
         ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
         if (type == ObjectType.MUSHROOM) {

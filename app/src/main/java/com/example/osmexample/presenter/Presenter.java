@@ -43,7 +43,7 @@ public class Presenter {
     }
 
     public void addMarker(PlacemarkMapObject placemark, String name, String description, ObjectType type, LocalDateTime dateTime) {
-        MarkerInfo markerInfo = new MarkerInfo(placemark.getGeometry(), name, description, type, dateTime);
+        MarkerInfo markerInfo = new MarkerInfo(placemark.getGeometry(), name, description, type, dateTime, true);
         Marker marker = new Marker(placemark, markerInfo);
         addMarker(marker);
     }

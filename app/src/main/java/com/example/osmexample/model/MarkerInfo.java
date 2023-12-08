@@ -10,19 +10,20 @@ public class MarkerInfo {
     private String description;
     private ObjectType markerType;
     private final String dateTime;
+    private boolean visible;
 
-    public MarkerInfo(Point point, String name, String description, ObjectType markerType, LocalDateTime dateTime) {
+    public MarkerInfo(Point point, String name, String description, ObjectType markerType, LocalDateTime dateTime, boolean visible) {
         this.point = point;
         this.name = name;
         this.description = description;
         this.markerType = markerType;
         this.dateTime = dateTime.toString();
+        this.visible = visible;
     }
 
     public Point getPoint() {
         return point;
     }
-
 
     public ObjectType getMarkerType() {
         return markerType;
@@ -50,5 +51,13 @@ public class MarkerInfo {
 
     public LocalDateTime getDateTime() {
         return LocalDateTime.parse(dateTime);
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }
