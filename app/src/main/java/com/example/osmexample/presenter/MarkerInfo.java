@@ -1,20 +1,22 @@
-package com.example.osmexample;
+package com.example.osmexample.presenter;
 
 import androidx.annotation.NonNull;
 
+import com.example.osmexample.model.MiniMarkerInfo;
+import com.example.osmexample.model.ObjectType;
 import com.yandex.mapkit.map.PlacemarkMapObject;
 
 import java.time.LocalDateTime;
 
 public class MarkerInfo {
-    private PlacemarkMapObject placemark;
+    private final PlacemarkMapObject placemark;
     private String name;
     private String description;
-    private MarkerType markerType;
-    private LocalDateTime dateTime;
+    private ObjectType markerType;
+    private final LocalDateTime dateTime;
 
 
-    public MarkerInfo(PlacemarkMapObject placemark, String name, String description, MarkerType markerType, LocalDateTime dateTime) {
+    public MarkerInfo(PlacemarkMapObject placemark, String name, String description, ObjectType markerType, LocalDateTime dateTime) {
         this.placemark = placemark;
         this.name = name;
         this.description = description;
@@ -22,11 +24,11 @@ public class MarkerInfo {
         this.dateTime = dateTime;
     }
 
-    public MarkerType getMarkerType() {
+    public ObjectType getMarkerType() {
         return markerType;
     }
 
-    public void setMarkerType(MarkerType markerType) {
+    public void setMarkerType(ObjectType markerType) {
         this.markerType = markerType;
     }
 
@@ -52,6 +54,10 @@ public class MarkerInfo {
 
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+
+    public MiniMarkerInfo getStorageFormat() {
+        return new MiniMarkerInfo(placemark.getGeometry(), name, description, markerType, dateTime);
     }
 
     @NonNull
