@@ -41,6 +41,14 @@ public class Route {
         routeInfo.setDescription(description);
     }
 
+    public boolean isVisible() {
+        return routeInfo.isVisible();
+    }
+
+    public void setVisible(boolean visible) {
+        routeInfo.setVisible(visible);
+    }
+
     public PolylineMapObject getPolyline() {
         return polyline;
     }

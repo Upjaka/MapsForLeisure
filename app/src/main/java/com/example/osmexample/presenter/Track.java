@@ -41,6 +41,14 @@ public class Track {
         trackInfo.setDescription(description);
     }
 
+    public boolean isVisible() {
+        return trackInfo.isVisible();
+    }
+
+    public void setVisible(boolean visible) {
+        trackInfo.setVisible(visible);
+    }
+
     public PolylineMapObject getPolyline() {
         return polyline;
     }

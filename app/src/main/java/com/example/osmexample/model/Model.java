@@ -10,14 +10,14 @@ public class Model {
     private final Set<MarkerInfo> markerList;
     private final Set<RouteInfo> routeList;
     private final Set<RouteInfo> trackList;
-
+    private final List<User> users;
 
     public Model(String filesDir) {
         this.filesDir = filesDir;
         markerList = new HashSet<>();
         routeList = new HashSet<>();
         trackList = new HashSet<>();
-
+        users = new ArrayList<>();
     }
 
     public List<MarkerInfo> getMarkerList() {
@@ -38,6 +38,22 @@ public class Model {
 
     public void removeMarker(MarkerInfo markerInfo) {
         markerList.remove(markerInfo);
+    }
+
+    public void addRoute(RouteInfo routeInfo) {
+        routeList.add(routeInfo);
+    }
+
+    public void removeRoute(RouteInfo routeInfo) {
+        routeList.remove(routeInfo);
+    }
+
+    public void addTrack(RouteInfo trackInfo) {
+        trackList.add(trackInfo);
+    }
+
+    public void removeTrack(RouteInfo trackInfo) {
+        trackList.remove(trackInfo);
     }
 
     public void saveDataToFiles() {

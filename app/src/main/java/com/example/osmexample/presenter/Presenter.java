@@ -3,6 +3,7 @@ package com.example.osmexample.presenter;
 import com.example.osmexample.model.MarkerInfo;
 import com.example.osmexample.model.Model;
 import com.example.osmexample.model.ObjectType;
+import com.example.osmexample.model.RouteInfo;
 import com.yandex.mapkit.map.MapObject;
 import com.yandex.mapkit.map.PlacemarkMapObject;
 
@@ -48,12 +49,40 @@ public class Presenter {
         addMarker(marker);
     }
 
+    public void addRoute(Route route) {
+        routeInfoMap.put(route.getPolyline(), route);
+        model.addRoute(route.getRouteInfo());
+    }
+
+    public void addTrack(Track track) {
+        trackInfoMap.put(track.getPolyline(), track);
+        model.addTrack(track.getTrackInfo());
+    }
+
     public Marker getMarker(MapObject placemark) {
         return markerInfoMap.get(placemark);
+    }
+
+    public Route getRoute(MapObject polyline) {
+        return routeInfoMap.get(polyline);
+    }
+
+    public Track getTrack(MapObject polyline) {
+        return trackInfoMap.get(polyline);
     }
 
     public void removeMarker(MapObject placemark) {
         markerInfoMap.remove(placemark);
         model.removeMarker(markerInfoMap.get(placemark).getMarkerInfo());
+    }
+
+    public void removeRoute(MapObject polyline) {
+        routeInfoMap.remove(polyline);
+        model.removeRoute(routeInfoMap.get(polyline).getRouteInfo());
+    }
+
+    public void removeTrack(MapObject polyline) {
+        trackInfoMap.remove(polyline);
+        model.removeTrack(trackInfoMap.get(polyline).getTrackInfo());
     }
 }

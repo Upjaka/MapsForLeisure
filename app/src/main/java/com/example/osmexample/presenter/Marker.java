@@ -17,14 +17,6 @@ public class Marker {
         this.markerInfo = markerInfo;
     }
 
-    public ObjectType getMarkerType() {
-        return markerInfo.getMarkerType();
-    }
-
-    public void setMarkerType(ObjectType markerType) {
-        this.markerInfo.setMarkerType(markerType);
-    }
-
     public String getName() {
         return markerInfo.getName();
     }
@@ -39,6 +31,22 @@ public class Marker {
 
     public void setDescription(String description) {
         this.markerInfo.setDescription(description);
+    }
+
+    public ObjectType getMarkerType() {
+        return markerInfo.getMarkerType();
+    }
+
+    public void setMarkerType(ObjectType markerType) {
+        this.markerInfo.setMarkerType(markerType);
+    }
+
+    public boolean isVisible() {
+        return markerInfo.isVisible();
+    }
+
+    public void setVisible(boolean visible) {
+        markerInfo.setVisible(visible);
     }
 
     public PlacemarkMapObject getPlacemark() {

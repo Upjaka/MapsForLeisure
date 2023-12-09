@@ -64,7 +64,6 @@ import com.yandex.runtime.image.ImageProvider;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -127,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
         addCurrentLocationMarker();
 
         // Загрузка сохраненных маркеров
-        presenter.loadData();
         List<MarkerInfo> markerInfos = presenter.getMarkerList();
         for (MarkerInfo markerInfo : markerInfos) {
             drawMarker(markerInfo);
@@ -169,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         createMenu();
     }
 
-    private InputListener longTapListener = new InputListener() {
+    private final InputListener longTapListener = new InputListener() {
         @Override
         public void onMapTap(@NonNull Map map, @NonNull Point point) {
         }

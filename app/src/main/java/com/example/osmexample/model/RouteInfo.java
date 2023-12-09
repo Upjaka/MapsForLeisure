@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class RouteInfo {
-    private List<Point> points;
+    private final List<Point> points;
     private String name;
     private String description;
     private ObjectType routeType;
