@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".MainActivity">
+    tools:context=".view.MainActivity">
 
     <FrameLayout
         android:id="@+id/loadingScreen"
@@ -125,6 +125,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:alpha="0.7"
+            android:background="#FFFFFF"
             android:onClick="onMenuButtonClick"
             android:src="@drawable/menu"
             android:translationZ="2dp" />
