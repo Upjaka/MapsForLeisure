@@ -33,45 +33,42 @@
         android:id="@+id/markerInfoPanel"
         android:layout_width="260dp"
         android:layout_height="260dp"
-        android:background="#FFFFFF"
+        android:background="#DCEDC8"
         android:orientation="vertical"
         android:translationX="65dp"
         android:translationY="90dp"
         android:translationZ="2dp"
         android:visibility="invisible">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/markerName"
-                android:layout_width="220dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clickable="false"
-                android:minHeight="48dp"
-                android:text="@string/MarkerInfoMarkerNameText"
-                android:textAlignment="center" />
+                android:layout_gravity="center"
+                android:maxEms="12"
+                android:text="@string/MarkerInfoMarkerNameText" />
 
             <ImageView
                 android:id="@+id/closeMarkerInfoButton"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_weight="1"
+                android:layout_gravity="right"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
                 android:onClick="onCloseMarkerInfoButtonClicked"
-                android:src="@drawable/close"
-                app:srcCompat="@drawable/close" />
-        </LinearLayout>
+                android:src="@drawable/close" />
+        </FrameLayout>
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:layout_margin="3dp"
-            android:layout_marginStart="3dp"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:layout_marginBottom="3dp">
+            android:layout_height="110dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:background="#F1F8E9">
 
             <TextView
                 android:id="@+id/markerDescription"
@@ -81,36 +78,98 @@
                 android:minHeight="48dp" />
         </ScrollView>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:minHeight="30dp"
             android:orientation="horizontal">
 
-            <Button
+            <ImageView
                 android:id="@+id/buttonEdit"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="bottom|left"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
+                android:layout_marginLeft="25dp"
+                android:layout_marginBottom="25dp"
                 android:onClick="onChangeMarkerButtonClicked"
-                android:text="@string/MarkerInfoChangeButtonText"
-                android:textSize="13sp" />
+                android:src="@drawable/edit" />
 
-            <Button
-                android:id="@+id/buttonDelete"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/buttonOpenListMarkers"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="25dp"
+                android:onClick="onOpenListMarkersButtonClicked"
+                android:src="@drawable/list_markers" />
+
+            <ImageView
+                android:id="@+id/buttonDeleteMarker"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="bottom|right"
-                android:layout_marginLeft="9dp"
-                android:layout_marginRight="9dp"
-                android:layout_weight="1"
+                android:layout_marginRight="25dp"
+                android:layout_marginBottom="25dp"
                 android:onClick="onDeleteMarkerButtonClicked"
-                android:text="@string/MarkerInfoDeleteButtonText" />
-        </LinearLayout>
+                android:src="@drawable/garbage" />
+        </FrameLayout>
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/listLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF8E1"
+        android:padding="16dp"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFE082"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/listText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_marginStart="30dp"
+                android:text="@string/topPanelListMarkersText"
+                android:textColor="#000"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/listCloseButton"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="right"
+                android:layout_marginStart="100dp"
+                android:alpha="0.7"
+                android:onClick="onListButtonClick"
+                android:src="@drawable/close" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="60dp"
+            android:layout_marginBottom="120dp" />
+
+        <TextView
+            android:id="@+id/emptyListText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/notMarkersListMarkersText"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/MainLayout"
@@ -227,122 +286,169 @@
             android:id="@+id/mapview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
-
-    <LinearLayout
-        android:id="@+id/setMarkerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:translationZ="3dp"
-        android:visibility="invisible">
-
-        <TextView
-            android:id="@+id/textViewTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/AddNewMarkerTitleText"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textViewNameLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/MarkerNameLabelText"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/editMarkerName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:hint="@string/EditMarkerNameText"
-            android:inputType="text" />
-
-        <TextView
-            android:id="@+id/textViewCheckboxLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/MarkerTypeCheckboxText"
-            android:textSize="16sp" />
-
-        <RadioGroup
-            android:id="@+id/markerType"
-            android:layout_width="match_parent"
-            android:layout_height="160dp">
-
-            <RadioButton
-                android:id="@+id/mushroomRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/MushroomRadioButtonText" />
-
-            <RadioButton
-                android:id="@+id/fishRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/FishRadioButtonText" />
-
-            <RadioButton
-                android:id="@+id/walkRadioButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/WalkRadioButtonText" />
-
-        </RadioGroup>
-
-        <TextView
-            android:id="@+id/textViewDescriptionLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/DescriptionLabelText"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/editTextDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/DescriptionButtonText"
-            android:inputType="textMultiLine" />
 
         <LinearLayout
+            android:id="@+id/createOrChangeLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="500dp"
             android:layout_gravity="bottom"
-            android:orientation="horizontal">
+            android:background="#FFFFFF"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:translationZ="3dp"
+            android:visibility="invisible">
 
-            <Button
-                android:id="@+id/buttonSave"
+            <TextView
+                android:id="@+id/createOrChangeTitleText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/AddNewMarkerTitleText"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/createOrChangeNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/MarkerNameLabelText"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/createOrChangeInputName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:hint="@string/EditMarkerNameText"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/createOrChangeDescriptionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DescriptionLabelText"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/createOrChangeInputDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/DescriptionButtonText"
+                android:inputType="textMultiLine" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/MarkerTypeCheckboxText"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/fish_marker" />
+
+                <ImageView
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/mushroom_marker" />
+
+                <ImageView
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/walk_marker" />
+
+                <ImageView
+                    android:layout_width="65dp"
+                    android:layout_height="65dp"
+                    android:src="@drawable/default_marker" />
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/markerType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/fishRadioButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="50dp"
+                    android:background="@drawable/button_bg" />
+
+                <RadioButton
+                    android:id="@+id/mushroomRadioButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="50dp"
+                    android:background="@drawable/button_bg" />
+
+                <RadioButton
+                    android:id="@+id/walkRadioButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="50dp"
+                    android:background="@drawable/button_bg" />
+
+                <RadioButton
+                    android:id="@+id/defaultRadioButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/button_bg" />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="bottom"
-                android:onClick="onSaveMarkerButton"
-                android:text="@string/SaveButtonText" />
+                android:orientation="horizontal">
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                <Button
+                    android:id="@+id/buttonCreateOrChange"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:backgroundTint="#FFD54F"
+                    android:onClick="onCreateOrChangeButton"
+                    android:text="@string/SaveButtonText"
+                    android:textColor="#000000"
+                    app:strokeColor="#FF6F00"
+                    app:strokeWidth="3dp" />
 
-            <Button
-                android:id="@+id/buttonCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:onClick="onCancelMarkerButton"
-                android:text="@string/CancelButtonText" />
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/buttonCancel"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:backgroundTint="#FFD54F"
+                    android:onClick="onCancelMarkerButton"
+                    android:text="@string/CancelButtonText"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    app:strokeColor="#FF6F00"
+                    app:strokeWidth="3dp" />
+            </LinearLayout>
+
         </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </FrameLayout>
-
-    </LinearLayout>
+    </FrameLayout>
 
 </FrameLayout>
