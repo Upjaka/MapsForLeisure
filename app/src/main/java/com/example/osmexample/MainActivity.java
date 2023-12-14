@@ -17,10 +17,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -54,6 +51,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -69,14 +67,24 @@ public class MainActivity extends AppCompatActivity{
     private PlacemarkMapObject locationMarker = null;
     private InputListener inputListener = null;
     private FrameLayout loadingScreen = null;
+    private FrameLayout listLayout = null;
     private FrameLayout mainLayout = null;
     private LinearLayout setMarkerLayout = null;
     private LinearLayout markerInfoPanel = null;
     private ListView menu = null;
+    private ListView listView = null;
     private LocationManager locationManager;
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
+    private TextView listText = null;
+    private TextView emptyListText = null;
+    private TextView createOrChangeTitleText = null;
+    private TextView createOrChangeNameText = null;
+    private TextView createOrChangeInputNameText = null;
+    private TextView createOrChangeDescriptionText = null;
+    private TextView createOrChangeInputDescriptionText = null;
     private java.util.Map<MapObject, MarkerInfo> markerInfoMap = null;
+    private View.OnClickListener changeClickListener = null;
     Gson gson = null;
 
     @SuppressLint("MissingPermission")
@@ -92,10 +100,19 @@ public class MainActivity extends AppCompatActivity{
 
         mapView = findViewById(R.id.mapview);
         mainLayout = findViewById(R.id.MainLayout);
-        setMarkerLayout = findViewById(R.id.setMarkerLayout);
+        setMarkerLayout = findViewById(R.id.createOrChangeLayout);
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
-        loadingScreen = findViewById(R.id.loadingScreen);
+        loadingScreen = findViewById(R.id.loadingScreenLayout);
         menu = findViewById(R.id.menu);
+        listView = findViewById(R.id.listView);
+        listLayout = findViewById(R.id.listLayout);
+        listText = findViewById(R.id.listText);
+        emptyListText = findViewById(R.id.emptyListText);
+        createOrChangeTitleText = findViewById(R.id.createOrChangeTitleText);
+        createOrChangeNameText = findViewById(R.id.createOrChangeNameText);
+        createOrChangeInputNameText = findViewById(R.id.createOrChangeInputName);
+        createOrChangeDescriptionText = findViewById(R.id.createOrChangeDescriptionText);
+        createOrChangeInputDescriptionText = findViewById(R.id.createOrChangeInputDescription);
 
         // Определение местоположения
         requestLocationPermission();
@@ -171,89 +188,102 @@ public class MainActivity extends AppCompatActivity{
             mainLayout.setVisibility(View.VISIBLE);
         }, LOADING_SCREEN_TIME_OUT);
 
-        // Создание меню
+        // Создание выпадающего меню
         ArrayList<MenuItem> menuItems = new ArrayList<>();
         menuItems.add(new MenuItem(R.drawable.back, "Закрыть меню"));
-        menuItems.add(new MenuItem(R.drawable.routes, "Мои маршруты"));
         menuItems.add(new MenuItem(R.drawable.markers, "Мои метки"));
+        menuItems.add(new MenuItem(R.drawable.routes, "Мои маршруты"));
         menuItems.add(new MenuItem(R.drawable.tracks, "Мои треки"));
-        menuItems.add(new MenuItem(R.drawable.settings, "Настройки"));
         menuItems.add(new MenuItem(R.drawable.exit, "Выход"));
-
+        // Для вывода меню на экран
         MenuAdapter menuAdapter = new MenuAdapter(this, menuItems);
         menu.setAdapter(menuAdapter);
+        // Создание мапы: тип метки - ссылка на изображение
+        java.util.Map<MarkerType, Integer> imageViewMap = new HashMap<>();
+        imageViewMap.put(MarkerType.DEFAULT, R.drawable.default_marker);
+        imageViewMap.put(MarkerType.MUSHROOM, R.drawable.mushroom_marker);
+        imageViewMap.put(MarkerType.FISH, R.drawable.fish_marker);
+        imageViewMap.put(MarkerType.WALK, R.drawable.walk_marker);
+
         menu.setOnItemClickListener((parent, view, position, id) -> {
             switch (position) {
                 case 0:
                     // Действие для "Закрыть меню"
                     menu.setVisibility(View.GONE);
-                    findViewById(R.id.menuButton).setVisibility(View.VISIBLE);
+                    emptyListText.setText("У вас пока нет меток");
+                    emptyListText.setVisibility(View.VISIBLE);
                     break;
                 case 1:
-                    // Действие для "Мои маршруты"
+                    // Действие для "Мои метки"
+                    // Создание списка с сохраненными метками
+                    if (markerInfoMap.values().isEmpty()) {
+                        listView.setVisibility(View.INVISIBLE);
+                        findViewById(R.id.emptyListText).setVisibility(View.VISIBLE);
+                    } else {
+                        ArrayList<ListItem> listMarkersItems = new ArrayList<>();
+                        for (MarkerInfo markerInfo : markerInfoMap.values()) {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            String formattedDateTime = markerInfo.getDateTime().format(formatter);
+                            listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                        }
+
+                        ListItemsAdapter listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
+                        listView.setAdapter(listMarkersAdapter);
+                        emptyListText.setVisibility(View.INVISIBLE);
+                    }
+                    mainLayout.setVisibility(View.GONE);
+                    listText.setText("Мои метки");
+                    listLayout.setVisibility(View.VISIBLE);
                     break;
                 case 2:
-                    // Действие для "Мои метки"
+                    // Действие для "Мои маршруты"
+                    if (markerInfoMap.values().isEmpty()) {
+                        listView.setVisibility(View.INVISIBLE);
+                        emptyListText.setText("У вас пока нет маршрутов");
+                        emptyListText.setVisibility(View.VISIBLE);
+                    } else {
+                        ArrayList<ListItem> listRoutesItems = new ArrayList<>();
+                        for (MarkerInfo markerInfo : markerInfoMap.values()) {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            String formattedDateTime = markerInfo.getDateTime().format(formatter);
+                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                        }
+
+                        ListItemsAdapter listRoutesAdapter = new ListItemsAdapter(this, listRoutesItems);
+                        listView.setAdapter(listRoutesAdapter);
+                        emptyListText.setVisibility(View.INVISIBLE);
+                    }
+                    mainLayout.setVisibility(View.GONE);
+                    listText.setText("Мои маршруты");
+                    listLayout.setVisibility(View.VISIBLE);
                     break;
                 case 3:
                     // Действие для "Мои треки"
+                    if (markerInfoMap.values().isEmpty()) {
+                        listView.setVisibility(View.INVISIBLE);
+                        emptyListText.setText("У вас пока нет треков");
+                        emptyListText.setVisibility(View.VISIBLE);
+                    } else {
+                        ArrayList<ListItem> listTracksItems = new ArrayList<>();
+                        for (MarkerInfo markerInfo : markerInfoMap.values()) {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            String formattedDateTime = markerInfo.getDateTime().format(formatter);
+                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                        }
+
+                        ListItemsAdapter listTracksAdapter = new ListItemsAdapter(this, listTracksItems);
+                        listView.setAdapter(listTracksAdapter);
+                        emptyListText.setVisibility(View.INVISIBLE);
+                    }
+                    mainLayout.setVisibility(View.GONE);
+                    listText.setText("Мои треки");
+                    listLayout.setVisibility(View.VISIBLE);
                     break;
                 case 4:
-                    // Действие для "Настройки"
-                    break;
-                case 5:
                     // Действие для "Выход"
                     break;
             }
         });
-    }
-
-    public static class MenuItem {
-        private final int imageId;
-        private final String text;
-
-        public MenuItem(int imageId, String text) {
-            this.imageId = imageId;
-            this.text = text;
-        }
-
-        public int getImageId() {
-            return imageId;
-        }
-
-        public String getText() {
-            return text;
-        }
-    }
-
-    public static class MenuAdapter extends ArrayAdapter<MenuItem> {
-        private final ArrayList<MenuItem> menuItems;
-        private final Context mContext;
-
-        public MenuAdapter(Context context, ArrayList<MenuItem> items) {
-            super(context, 0, items);
-            mContext = context;
-            menuItems = items;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            View listItem = convertView;
-            if (listItem == null) {
-                listItem = LayoutInflater.from(mContext).inflate(R.layout.item_menu, parent, false);
-            }
-
-            MenuItem currentItem = menuItems.get(position);
-
-            ImageView imageView = listItem.findViewById(R.id.imageView);
-            imageView.setImageResource(currentItem.getImageId());
-
-            TextView textView = listItem.findViewById(R.id.textView);
-            textView.setText(currentItem.getText());
-
-            return listItem;
-        }
     }
 
     // Изменение положения метки при изменении текущего местоположения
@@ -357,18 +387,24 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void onCenterMarkerClick(View view) {
-        mainLayout.setVisibility(View.INVISIBLE);
+        //mainLayout.setVisibility(View.INVISIBLE);
         findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
+        createOrChangeTitleText.setText("Создать метку");
+        createOrChangeNameText.setText("Имя метки");
+        createOrChangeInputNameText.setHint("Введите имя метки");
+        createOrChangeDescriptionText.setText("Описание метки");
+        createOrChangeInputDescriptionText.setHint("Введите описание метки");
+        // Тут надо установить слушателя на кнопку buttonSave для создания метки
         setMarkerLayout.setVisibility(View.VISIBLE);
     }
 
-    public void onSaveMarkerButton(View view) {
+    public void onSaveOrChangeButton(View view) {
         ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
                 mapView.getMapWindow().height() / 2f);
         Point point = mapView.getMapWindow().screenToWorld(screenPoint);
-        TextView nameView = findViewById(R.id.editMarkerName);
+        TextView nameView = findViewById(R.id.createOrChangeInputName);
         String markerName = nameView.getText().toString();
-        TextView descriptionView = findViewById(R.id.editTextDescription);
+        TextView descriptionView = findViewById(R.id.createOrChangeInputDescription);
         String markerDescription = descriptionView.getText().toString();
         MarkerType markerType = MarkerType.DEFAULT;
         RadioButton mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
@@ -429,20 +465,23 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void onChangeMarkerButtonClicked(View view) {
-        mainLayout.setVisibility(View.INVISIBLE);
-        setMarkerLayout.setVisibility(View.VISIBLE);
+        findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
+        createOrChangeTitleText.setText("Изменить метку");
+        createOrChangeNameText.setText("Имя метки");
+        createOrChangeDescriptionText.setText("Описание метки");
 
         MarkerInfo markerInfo = markerInfoMap.get(clickedMarker);
-        TextView nameView = findViewById(R.id.editMarkerName);
-        TextView descriptionView = findViewById(R.id.editTextDescription);
         if (markerInfo == null) {
-            nameView.setText("");
-            descriptionView.setText("");
+            createOrChangeInputNameText.setHint("Введите имя метки");
+            createOrChangeInputDescriptionText.setHint("Введите описание метки");
         }
         else {
-            nameView.setText(markerInfo.getName());
-            descriptionView.setText(markerInfo.getDescription());
+            createOrChangeInputNameText.setHint(markerInfo.getName());
+            createOrChangeInputDescriptionText.setHint(markerInfo.getDescription());
         }
+        // Тут надо установить слушателя на кнопку buttonSave для изменения данных метки
+        markerInfoPanel.setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
     }
 
     public void onDeleteMarkerButtonClicked(View view) {
@@ -512,6 +551,12 @@ public class MainActivity extends AppCompatActivity{
 
     public void onMenuButtonClick(View view) {
         menu.setVisibility(View.VISIBLE);
-        findViewById(R.id.menuButton).setVisibility(View.GONE);
+        findViewById(R.id.mapMenuButton).setVisibility(View.GONE);
+
+    }
+
+    public void onListMarkersButtonClick(View view) {
+        listLayout.setVisibility(View.GONE);
+        mainLayout.setVisibility(View.VISIBLE);
     }
 }

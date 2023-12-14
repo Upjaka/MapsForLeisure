@@ -2,17 +2,16 @@
     <string name="app_name">OSMexample</string>
     <string name="CancelButtonText">Отмена</string>
     <string name="SaveButtonText">Сохранить</string>
-    <string name="DescriptionButtonText">Введите описание</string>
-    <string name="DescriptionLabelText">Описание</string>
-    <string name="WalkRadioButtonText">Для пеших прогулок</string>
-    <string name="FishRadioButtonText">Для рыбаков</string>
-    <string name="MushroomRadioButtonText">Для грибников</string>
-    <string name="MarkerTypeCheckboxText">Дополнительные опции</string>
-    <string name="EditMarkerNameText">Введите название</string>
-    <string name="MarkerNameLabelText">Название</string>
-    <string name="AddNewMarkerTitleText">Новая метка</string>
+    <string name="DescriptionButtonText">Введите описание метки</string>
+    <string name="DescriptionLabelText">Описание метки</string>
+    <string name="MarkerTypeCheckboxText">Тип метки</string>
+    <string name="EditMarkerNameText">Введите имя метки</string>
+    <string name="MarkerNameLabelText">Имя метки</string>
+    <string name="AddNewMarkerTitleText">Создать метку</string>
     <string name="MarkerInfoMarkerNameText">Имя метки</string>
     <string name="MarkerInfoChangeButtonText">Изменить</string>
     <string name="MarkerInfoDeleteButtonText">Удалить</string>
     <string name="LoadingScreenText">Загрузка...</string>
+    <string name="topPanelListMarkersText">Мои метки</string>
+    <string name="notMarkersListMarkersText">Пока что у вас нет меток</string>
 </resources>
