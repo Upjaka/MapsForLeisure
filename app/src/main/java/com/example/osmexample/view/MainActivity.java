@@ -236,8 +236,7 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     // Действие для "Закрыть меню"
                     menu.setVisibility(View.GONE);
-                    emptyListText.setText("У вас пока нет меток");
-                    emptyListText.setVisibility(View.VISIBLE);
+                    findViewById(R.id.menuButton).setVisibility(View.VISIBLE);
                     break;
                 case 1:
                     // Действие для "Мои метки"
@@ -250,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                            listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
                         }
 
                         ListItemsAdapter listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
@@ -272,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
                         }
 
                         ListItemsAdapter listRoutesAdapter = new ListItemsAdapter(this, listRoutesItems);
@@ -294,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.check_marker));
+                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
                         }
 
                         ListItemsAdapter listTracksAdapter = new ListItemsAdapter(this, listTracksItems);
