@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout listLayout = null;
     private FrameLayout confirmationLayout = null;
     private FrameLayout displayLayout = null;
+    private FrameLayout trackOrRouteLayout = null;
     private LinearLayout setMarkerLayout = null;
     private LinearLayout markerInfoPanel = null;
     private ListView menu = null;
@@ -136,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         createOrChangeInputDescriptionText = findViewById(R.id.createOrChangeInputDescription);
         confirmationLayout = findViewById(R.id.confirmationLayout);
         displayLayout = findViewById(R.id.displayLayout);
+        trackOrRouteLayout = findViewById(R.id.trackOrRouteLayout);
 
         // Определение местоположения
         requestLocationPermission();
@@ -556,6 +558,15 @@ public class MainActivity extends AppCompatActivity {
     public void onTrackingButtonClicked(View view) {
         Button trackingButton = findViewById(R.id.trackingButton);
         if (!isTracking) {
+            trackOrRouteLayout.setVisibility(View.VISIBLE);
+            Button confirmButton = findViewById(R.id.doTrackOrRouteButton);
+            confirmButton.setText("Сохранить");
+            // Обработчик кнопки "Сохранить"
+            confirmButton.setOnClickListener(null);
+            Button deleteButton = findViewById(R.id.deleteTrackOrRouteButton);
+            // Обработчик кнопки "Удалить"
+            deleteButton.setOnClickListener(null);
+
             trackPolylines = new ArrayList<>();
             track = new ArrayList<>();
             track.add(userLocation);
@@ -599,6 +610,14 @@ public class MainActivity extends AppCompatActivity {
         pedestrianRouter.requestRoutes(requestPoints, timeOptions, routeListener);
         centerMarker.setOnClickListener(null);
         centerMarker.setVisibility(View.INVISIBLE);
+        trackOrRouteLayout.setVisibility(View.VISIBLE);
+        Button confirmButton = findViewById(R.id.doTrackOrRouteButton);
+        confirmButton.setText("Сохранить");
+        // Обработчик кнопки "Сохранить"
+        confirmButton.setOnClickListener(null);
+        Button deleteButton = findViewById(R.id.deleteTrackOrRouteButton);
+        // Обработчик кнопки "Удалить"
+        deleteButton.setOnClickListener(null);
     }
 
     private final MapObjectTapListener onMarkerTapListener = (mapObject, point) -> {
@@ -699,5 +718,9 @@ public class MainActivity extends AppCompatActivity {
             selectedItem.setImageId3(R.drawable.visible);
         }
         listMarkersAdapter.notifyDataSetChanged();
+    }
+
+    public void onCloseTrackOrRouteLayoutButton(View view) {
+        trackOrRouteLayout.setVisibility(View.INVISIBLE);
     }
 }

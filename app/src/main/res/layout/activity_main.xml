@@ -625,14 +625,14 @@
             android:visibility="invisible">
 
             <ImageView
-                android:id="@+id/trackOrRouteLayoutCloseButton"
+                android:id="@+id/closeTrackOrRouteLayoutButton"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="right"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:alpha="1"
-                android:onClick="onDisplayLayoutButtonClick"
+                android:onClick="onCloseTrackOrRouteLayoutButton"
                 android:src="@drawable/close" />
 
             <TextView
