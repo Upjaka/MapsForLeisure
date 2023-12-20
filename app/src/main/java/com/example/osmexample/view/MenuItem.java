@@ -1,4 +1,4 @@
-package com.example.osmexample;
+package com.example.osmexample.view;
 
 public class MenuItem {
     private final int imageId;

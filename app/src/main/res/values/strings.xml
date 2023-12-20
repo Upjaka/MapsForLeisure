@@ -14,4 +14,11 @@
     <string name="LoadingScreenText">Загрузка...</string>
     <string name="topPanelListMarkersText">Мои метки</string>
     <string name="notMarkersListMarkersText">Пока что у вас нет меток</string>
+    <string name="confirmationText">Вы точно хотите удалить метку?</string>
+    <string name="cancelButtonText">Отмена</string>
+    <string name="confirmButtonText">Подтвердить</string>
+    <string name="displayLayoutText">Отобразить метки</string>
+    <string name="trackOrRouteLayoutText">Что вы хотите сделать с выбранным объектом?</string>
+    <string name="doTrackOrRouteButtonText">Изменить</string>
+    <string name="deleteTrackOrRouteButtonText">Удалить</string>
 </resources>

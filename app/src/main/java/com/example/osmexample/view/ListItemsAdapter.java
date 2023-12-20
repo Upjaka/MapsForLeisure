@@ -1,4 +1,4 @@
-package com.example.osmexample;
+package com.example.osmexample.view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,10 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.example.osmexample.R;
+
 import java.util.List;
 
 public class ListItemsAdapter extends ArrayAdapter<ListItem> {
-
     public ListItemsAdapter(Context context, List<ListItem> itemList) {
         super(context, 0, itemList);
     }
@@ -46,6 +47,9 @@ public class ListItemsAdapter extends ArrayAdapter<ListItem> {
             holder.dateTime.setText(item.getDateTime());
             holder.imageButton1.setImageResource(item.getImageId2());
             holder.imageButton2.setImageResource(item.getImageId3());
+            // Обработчики кнопок
+            holder.imageButton1.setOnClickListener(v -> ((MainActivity) getContext()).onDeleteButtonClick(position));
+            holder.imageButton2.setOnClickListener(v -> ((MainActivity) getContext()).onDisplayButtonClick(position));
         }
 
         return convertView;
