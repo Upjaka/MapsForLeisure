@@ -8,7 +8,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.PointF;
@@ -18,10 +17,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -32,8 +28,6 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.osmexample.ListItem;
-import com.example.osmexample.ListItemsAdapter;
 import com.example.osmexample.presenter.Marker;
 import com.example.osmexample.model.MarkerInfo;
 import com.example.osmexample.model.ObjectType;
@@ -87,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout loadingScreen = null;
     private FrameLayout mainLayout = null;
     private FrameLayout listLayout = null;
+    private FrameLayout confirmationLayout = null;
+    private FrameLayout displayLayout = null;
     private LinearLayout setMarkerLayout = null;
     private LinearLayout markerInfoPanel = null;
     private ListView menu = null;
@@ -105,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView createOrChangeTitleText = null;
     private TextView createOrChangeNameText = null;
     private TextView createOrChangeDescriptionText = null;
+    private ArrayList<ListItem> listMarkersItems;
+    private ListItemsAdapter listMarkersAdapter;
 
 
     @SuppressLint("MissingPermission")
@@ -136,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
         createOrChangeInputNameText = findViewById(R.id.createOrChangeInputName);
         createOrChangeDescriptionText = findViewById(R.id.createOrChangeDescriptionText);
         createOrChangeInputDescriptionText = findViewById(R.id.createOrChangeInputDescription);
+        confirmationLayout = findViewById(R.id.confirmationLayout);
+        displayLayout = findViewById(R.id.displayLayout);
 
         // Определение местоположения
         requestLocationPermission();
@@ -215,14 +215,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void createMenu() {
         // Создание выпадающего меню
-        ArrayList<com.example.osmexample.MenuItem> menuItems = new ArrayList<>();
-        menuItems.add(new com.example.osmexample.MenuItem(R.drawable.back, "Закрыть меню"));
-        menuItems.add(new com.example.osmexample.MenuItem(R.drawable.markers, "Мои метки"));
-        menuItems.add(new com.example.osmexample.MenuItem(R.drawable.routes, "Мои маршруты"));
-        menuItems.add(new com.example.osmexample.MenuItem(R.drawable.tracks, "Мои треки"));
-        menuItems.add(new com.example.osmexample.MenuItem(R.drawable.exit, "Выход"));
+        ArrayList<com.example.osmexample.view.MenuItem> menuItems = new ArrayList<>();
+        menuItems.add(new com.example.osmexample.view.MenuItem(R.drawable.back, "Закрыть меню"));
+        menuItems.add(new com.example.osmexample.view.MenuItem(R.drawable.markers, "Мои метки"));
+        menuItems.add(new com.example.osmexample.view.MenuItem(R.drawable.routes, "Мои маршруты"));
+        menuItems.add(new com.example.osmexample.view.MenuItem(R.drawable.tracks, "Мои треки"));
+        menuItems.add(new com.example.osmexample.view.MenuItem(R.drawable.exit, "Выход"));
         // Для вывода меню на экран
-        com.example.osmexample.MenuAdapter menuAdapter = new com.example.osmexample.MenuAdapter(this, menuItems);
+        com.example.osmexample.view.MenuAdapter menuAdapter = new com.example.osmexample.view.MenuAdapter(this, menuItems);
         menu.setAdapter(menuAdapter);
         // Создание мапы: тип метки - ссылка на изображение
         java.util.Map<ObjectType, Integer> imageViewMap = new HashMap<>();
@@ -242,17 +242,16 @@ public class MainActivity extends AppCompatActivity {
                     // Действие для "Мои метки"
                     // Создание списка с сохраненными метками
                     if (presenter.getMarkerList().isEmpty()) {
-                        listView.setVisibility(View.INVISIBLE);
                         emptyListText.setVisibility(View.VISIBLE);
                     } else {
-                        ArrayList<ListItem> listMarkersItems = new ArrayList<>();
+                        listMarkersItems = new ArrayList<>();
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
                             listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
                         }
 
-                        ListItemsAdapter listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
+                        listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
                         listView.setAdapter(listMarkersAdapter);
                         emptyListText.setVisibility(View.INVISIBLE);
                     }
@@ -640,66 +639,65 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Обработчик кнопки "Меню" на карте
     public void onMenuButtonClick(View view) {
         menu.setVisibility(View.VISIBLE);
         findViewById(R.id.menuButton).setVisibility(View.GONE);
     }
 
-    public void onListButtonClick(View view) {
+    // Обработчик кнопки "Закрыть" в окне со списками сохраненных меток/маршрутов/треков
+    public void onListCloseButtonClick(View view) {
         listLayout.setVisibility(View.GONE);
         mainLayout.setVisibility(View.VISIBLE);
         findViewById(R.id.menuButton).setVisibility(View.VISIBLE);
     }
 
+    // Обработчик кнопки "Открыть список сохраненных меток" в окне MarkerInfoPanel
     public void onOpenListMarkersButtonClicked(View view) {
-
+        markerInfoPanel.setVisibility(View.INVISIBLE);
+        listLayout.setVisibility(View.VISIBLE);
     }
 
-    public static class MenuItem {
-        private final int imageId;
-        private final String text;
-
-        public MenuItem(int imageId, String text) {
-            this.imageId = imageId;
-            this.text = text;
-        }
-
-        public int getImageId() {
-            return imageId;
-        }
-
-        public String getText() {
-            return text;
-        }
+    // Обработчик кнопки "Отображение меток"
+    public void onDisplayButtonClick(View view) {
+        displayLayout.setVisibility(View.VISIBLE);
     }
 
-    public static class MenuAdapter extends ArrayAdapter<MenuItem> {
-        private final ArrayList<MenuItem> menuItems;
-        private final Context mContext;
+    // Обработчик кнопки "Закрыть" в окне отображения меток
+    public void onDisplayLayoutButtonClick(View view) {
+        displayLayout.setVisibility(View.INVISIBLE);
+    }
 
-        public MenuAdapter(Context context, ArrayList<MenuItem> items) {
-            super(context, 0, items);
-            mContext = context;
-            menuItems = items;
+    // Обработчик кнопки "Удалить" в окне со списками сохраненных меток
+    public void onDeleteButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listMarkersItems.get(position);
+
+        // Показываем окно с подтверждением удаления
+        confirmationLayout.setVisibility(View.VISIBLE);
+        Button confirmButton = findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(v -> {
+            listMarkersItems.remove(selectedItem);
+            // Надо удалить метку из карты и добавить проверку на пустой список, если список пустой
+            // emptyListText.setVisibility(View.VISIBLE);
+            listMarkersAdapter.notifyDataSetChanged();
+            confirmationLayout.setVisibility(View.INVISIBLE);
+        });
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
+    }
+
+    // Обработчик кнопки "Отобразить" в окне со списками сохраненных меток
+    public void onDisplayButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listMarkersItems.get(position);
+
+        // Меняем изображение кнопки displayButton
+        if (selectedItem.getImageId3() == R.drawable.visible) {
+            selectedItem.setImageId3(R.drawable.invisible);
+        } else {
+            selectedItem.setImageId3(R.drawable.visible);
         }
-
-        @NonNull
-        @Override
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            View listItem = convertView;
-            if (listItem == null) {
-                listItem = LayoutInflater.from(mContext).inflate(R.layout.item_menu, parent, false);
-            }
-
-            MenuItem currentItem = menuItems.get(position);
-
-            ImageView imageView = listItem.findViewById(R.id.imageView);
-            imageView.setImageResource(currentItem.getImageId());
-
-            TextView textView = listItem.findViewById(R.id.textView);
-            textView.setText(currentItem.getText());
-
-            return listItem;
-        }
+        listMarkersAdapter.notifyDataSetChanged();
     }
 }

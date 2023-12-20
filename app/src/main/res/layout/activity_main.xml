@@ -149,9 +149,58 @@
                 android:layout_gravity="right"
                 android:layout_marginStart="100dp"
                 android:alpha="0.7"
-                android:onClick="onListButtonClick"
+                android:onClick="onListCloseButtonClick"
                 android:src="@drawable/close" />
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/confirmationLayout"
+            android:layout_width="260dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
+            android:background="#9CCC65"
+            android:visibility="invisible"
+            android:translationZ="3dp">
+
+            <TextView
+                android:id="@+id/confirmationText"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/confirmationText"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="112dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="#FFD54F"
+                android:text="@string/cancelButtonText"
+                android:textSize="12sp"
+                android:textAllCaps="false"
+                app:strokeColor="#FF6F00"
+                app:strokeWidth="3dp"/>
+
+            <Button
+                android:id="@+id/confirmButton"
+                android:layout_width="112dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="#FFD54F"
+                android:text="@string/confirmButtonText"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                app:strokeColor="#FF6F00"
+                app:strokeWidth="3dp" />
+        </FrameLayout>
 
         <ListView
             android:id="@+id/listView"
@@ -167,6 +216,7 @@
             android:layout_gravity="center"
             android:text="@string/notMarkersListMarkersText"
             android:textSize="20sp"
+            android:translationZ="2dp"
             android:visibility="invisible" />
 
     </FrameLayout>
@@ -193,14 +243,15 @@
             android:id="@+id/trackingButton"
             android:layout_width="130dp"
             android:layout_height="50dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginLeft="40dp"
+            android:layout_marginBottom="20dp"
             android:alpha="0.75"
             android:backgroundTint="#FFFFFF"
             android:onClick="onTrackingButtonClicked"
             android:text="Запись трека"
             android:textColor="#000000"
             android:textSize="12sp"
-            android:translationX="170dp"
-            android:translationY="690dp"
             app:icon="@drawable/tracking"
             app:iconGravity="start"
             app:iconPadding="1dp"
@@ -211,19 +262,33 @@
             android:id="@+id/routingButton"
             android:layout_width="145dp"
             android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="20dp"
             android:alpha="0.75"
             android:backgroundTint="#FFFFFF"
             android:onClick="onRouteButtonClicked"
             android:text="Найти маршрут"
             android:textColor="#000000"
             android:textSize="12sp"
-            android:translationX="15dp"
-            android:translationY="690dp"
             app:icon="@drawable/routing"
             app:iconGravity="start"
             app:iconPadding="1dp"
             app:iconSize="40dp"
             app:iconTint="#000000" />
+
+        <ImageView
+            android:id="@+id/displayButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:alpha="0.8"
+            android:background="#FFFFFF"
+            android:onClick="onDisplayButtonClick"
+            android:src="@drawable/display"
+            android:translationZ="2dp" />
 
         <ListView
             android:id="@+id/menu"
@@ -237,36 +302,39 @@
             android:id="@+id/myLocationButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_gravity="top|right"
+            android:layout_marginTop="130dp"
+            android:layout_marginEnd="20dp"
             android:alpha="0.7"
             android:background="@color/white"
             android:onClick="onMapCenterButtonClick"
             android:src="@drawable/my_location"
-            android:translationX="340dp"
-            android:translationY="70dp"
             android:translationZ="2dp" />
 
         <ImageView
             android:id="@+id/plusZoomButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="30dp"
             android:alpha="0.6"
             android:background="@color/white"
             android:onClick="onPlusZoomButtonClick"
             android:src="@drawable/plus"
-            android:translationX="340dp"
-            android:translationY="300dp"
             android:translationZ="2dp" />
 
         <ImageView
             android:id="@+id/minusZoomButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_gravity="center_vertical|right"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="20dp"
             android:alpha="0.6"
             android:background="@color/white"
             android:onClick="onMinusZoomButtonClick"
             android:src="@drawable/minus"
-            android:translationX="340dp"
-            android:translationY="370dp"
             android:translationZ="2dp" />
 
         <ImageView
@@ -386,27 +454,27 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginRight="50dp"
-                    android:background="@drawable/button_bg" />
+                    android:background="@drawable/bg_orange" />
 
                 <RadioButton
                     android:id="@+id/mushroomRadioButton"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginRight="50dp"
-                    android:background="@drawable/button_bg" />
+                    android:background="@drawable/bg_orange" />
 
                 <RadioButton
                     android:id="@+id/walkRadioButton"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginRight="50dp"
-                    android:background="@drawable/button_bg" />
+                    android:background="@drawable/bg_orange" />
 
                 <RadioButton
                     android:id="@+id/defaultRadioButton"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:background="@drawable/button_bg" />
+                    android:background="@drawable/bg_orange" />
 
             </RadioGroup>
 
@@ -448,6 +516,163 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/displayLayout"
+            android:layout_width="250dp"
+            android:layout_height="120dp"
+            android:layout_gravity="bottom|right"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="120dp"
+            android:background="#DCEDC8"
+            android:translationZ="3dp"
+            android:visibility="invisible">
+
+            <ImageView
+                android:id="@+id/displayLayoutCloseButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="right"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:alpha="1"
+                android:onClick="onDisplayLayoutButtonClick"
+                android:src="@drawable/close" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:text="@string/displayLayoutText"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/fish_marker" />
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/mushroom_marker" />
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginEnd="15dp"
+                    android:src="@drawable/walk_marker" />
+
+                <ImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:src="@drawable/default_marker" />
+            </LinearLayout>
+
+            <RadioButton
+                android:id="@+id/fishDisplayRadioButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp" />
+
+            <RadioButton
+                android:id="@+id/mushroomDisplayRadioButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginRight="30dp"
+                android:layout_marginBottom="10dp" />
+
+            <RadioButton
+                android:id="@+id/walkDisplayRadioButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginLeft="30dp"
+                android:layout_marginBottom="10dp" />
+
+            <RadioButton
+                android:id="@+id/defaultDisplayRadioButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|right"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="10dp" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/trackOrRouteLayout"
+            android:layout_width="250dp"
+            android:layout_height="130dp"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="100dp"
+            android:background="#DCEDC8"
+            android:visibility="invisible">
+
+            <ImageView
+                android:id="@+id/trackOrRouteLayoutCloseButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="right"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:alpha="1"
+                android:onClick="onDisplayLayoutButtonClick"
+                android:src="@drawable/close" />
+
+            <TextView
+                android:layout_width="220dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/trackOrRouteLayoutText"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/deleteTrackOrRouteButton"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="#FFD54F"
+                android:text="@string/deleteTrackOrRouteButtonText"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#FF6F00"
+                app:strokeWidth="3dp" />
+
+            <Button
+                android:id="@+id/doTrackOrRouteButton"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
+                android:backgroundTint="#FFD54F"
+                android:text="@string/doTrackOrRouteButtonText"
+                android:textAllCaps="false"
+                android:textSize="11sp"
+                app:strokeColor="#FF6F00"
+                app:strokeWidth="3dp" />
+        </FrameLayout>
 
     </FrameLayout>
 

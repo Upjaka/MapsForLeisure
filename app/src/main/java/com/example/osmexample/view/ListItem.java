@@ -1,4 +1,4 @@
-package com.example.osmexample;
+package com.example.osmexample.view;
 
 public class ListItem {
     private final int imageId1;
@@ -6,7 +6,7 @@ public class ListItem {
     private final String text2;
     private final String dateTime;
     private final int imageId2;
-    private final int imageId3;
+    private int imageId3;
 
     public ListItem(int imageId1, String text1, String text2, String dateTime, int imageId2, int imageId3) {
         this.imageId1 = imageId1;
@@ -31,4 +31,5 @@ public class ListItem {
     public int getImageId3() {
         return imageId3;
     }
+    public void setImageId3(int image) { this.imageId3 = image; }
 }
