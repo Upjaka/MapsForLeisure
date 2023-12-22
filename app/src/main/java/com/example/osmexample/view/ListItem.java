@@ -1,5 +1,7 @@
 package com.example.osmexample.view;
 
+import com.example.osmexample.R;
+
 public class ListItem {
     private final int imageId1;
     private final String text1;
@@ -8,13 +10,18 @@ public class ListItem {
     private final int imageId2;
     private int imageId3;
 
-    public ListItem(int imageId1, String text1, String text2, String dateTime, int imageId2, int imageId3) {
+    public ListItem(int imageId1, String text1, String text2, boolean visibility, String dateTime, int imageId2) {
         this.imageId1 = imageId1;
         this.text1 = text1;
         this.text2 = text2;
         this.dateTime = dateTime;
         this.imageId2 = imageId2;
-        this.imageId3 = imageId3;
+        if (visibility) {
+            this.imageId3 = R.drawable.visible;
+        } else {
+            this.imageId3 = R.drawable.invisible;
+        }
+
     }
 
     public int getImageId1() {
