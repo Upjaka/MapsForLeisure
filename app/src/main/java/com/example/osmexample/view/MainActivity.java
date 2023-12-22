@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         // Инициализация компонентов карты
         mapView = findViewById(R.id.mapview);
         mainLayout = findViewById(R.id.MainLayout);
-        setMarkerLayout = findViewById(R.id.createOrChangeLayout);
+        setMarkerLayout = findViewById(R.id.createFormLayout);
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
         loadingScreen = findViewById(R.id.loadingScreen);
         menu = findViewById(R.id.menu);
@@ -553,11 +553,11 @@ public class MainActivity extends AppCompatActivity {
         createOrChangeDescriptionText.setText("Описание метки");
         createOrChangeInputDescriptionText.setHint("Введите описание метки");
         setMarkerLayout.setVisibility(View.VISIBLE);
-        createOrChangeButton.setOnClickListener(this::onCreateOrChangeMarkerButtonClick);
+        createOrChangeButton.setOnClickListener(this::onCreateFormCreateOrChangeMarkerButtonClick);
     }
 
     //Обработчик нажатия кнопки "Сохранить" или "Изменить" для меток
-    public void onCreateOrChangeMarkerButtonClick(View view) {
+    public void onCreateFormCreateOrChangeMarkerButtonClick(View view) {
         ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
                 mapView.getMapWindow().height() / 2f);
         Point point = mapView.getMapWindow().screenToWorld(screenPoint);
@@ -607,8 +607,28 @@ public class MainActivity extends AppCompatActivity {
         setMarkerLayout.setVisibility(View.INVISIBLE);
     }
 
+    //Обработчик нажатия кнопки "Сохранить" для маршрутов
+    public void onCreateFormCreateRouteButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки "Изменить" для маршрутов
+    public void onCreateFormChangeRouteButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки "Сохранить" для треков
+    public void onCreateFormCreateTrackButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки"Изменить" для треков
+    public void onCreateFormChangeTrackButtonClick(View view) {
+
+    }
+
     // Обработчик нажатия кнопки "Отмена" при создании/изменении объекта
-    public void onCreateObjectCancelCreateButton(View view) {
+    public void onCreateFormCancelButton(View view) {
         setMarkerLayout.setVisibility(View.INVISIBLE);
         mainLayout.setVisibility(View.VISIBLE);
         mushroomRadioButton.setChecked(false);
@@ -776,7 +796,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSaveRouteChangeButtonClick(View view) {
+        createOrChangeTitleText.setText("Изменить маршрут");
+        createOrChangeNameText.setText("Имя маршрута");
+        createOrChangeDescriptionText.setText("Описание маршрута");
 
+        com.example.osmexample.presenter.Route route = presenter.getRoute(clickedRoute);
+        createOrChangeInputNameText.setText(route.getName());
+        createOrChangeInputDescriptionText.setHint(route.getDescription());
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
     }
 
     // Обработчики окна изменения параметров отображения меток/маршрутов/треков

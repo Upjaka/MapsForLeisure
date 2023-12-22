@@ -226,7 +226,7 @@
         android:id="@+id/MainLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <ImageView
             android:id="@+id/menuButton"
@@ -357,7 +357,7 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
-            android:id="@+id/createOrChangeLayout"
+            android:id="@+id/createFormLayout"
             android:layout_width="match_parent"
             android:layout_height="500dp"
             android:layout_gravity="bottom"
@@ -492,7 +492,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:backgroundTint="#FFD54F"
-                    android:onClick="onCreateOrChangeMarkerButtonClick"
+                    android:onClick="onCreateFormCreateOrChangeMarkerButtonClick"
                     android:text="@string/SaveButtonText"
                     android:textColor="#000000"
                     app:strokeColor="#FF6F00"
@@ -509,7 +509,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:backgroundTint="#FFD54F"
-                    android:onClick="onCreateObjectCancelCreateButton"
+                    android:onClick="onCreateFormCancelButton"
                     android:text="@string/CancelButtonText"
                     android:textColor="#000000"
                     android:textSize="14sp"
