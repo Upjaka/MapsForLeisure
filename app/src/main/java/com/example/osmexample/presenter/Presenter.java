@@ -18,7 +18,7 @@ public class Presenter {
     private final Model model;
     private final Map<MapObject, Marker> markerMap;
     private final Map<MapObject, Route> routeMap;
-    private final Map<MapObject, Track> trackMap;
+    private final Map<MapObject, Route> trackMap;
 
     public Presenter(String filesDir) {
         this.model = new Model(filesDir);
@@ -30,10 +30,6 @@ public class Presenter {
 
     public void saveData() {
         model.saveDataToFiles();
-    }
-
-    public void loadData() {
-        model.loadDataFromFiles();
     }
 
     public List<MarkerInfo> getMarkerList() {
@@ -70,9 +66,15 @@ public class Presenter {
         addRoute(route);
     }
 
-    public void addTrack(Track track) {
+    public void addTrack(Route track) {
         trackMap.put(track.getPolyline(), track);
-        model.addTrack(track.getTrackInfo());
+        model.addTrack(track.getRouteInfo());
+    }
+
+    public void addTrack(PolylineMapObject polyline, String name, String description, ObjectType type, LocalDateTime dateTime) {
+        RouteInfo trackInfo = new RouteInfo(polyline.getGeometry().getPoints(), name, description, type, dateTime, true);
+        Route track = new Route(polyline, trackInfo);
+        addTrack(track);
     }
 
     public Marker getMarker(MapObject placemark) {
@@ -84,18 +86,11 @@ public class Presenter {
         for (MapObject mapObject : markerMap.keySet()) {
             PlacemarkMapObject placemark = (PlacemarkMapObject) mapObject;
             if (placemark.getGeometry().getLongitude() == point.getLongitude()
-                && placemark.getGeometry().getLatitude() == point.getLatitude()) {
+                    && placemark.getGeometry().getLatitude() == point.getLatitude()) {
                 return markerMap.get(mapObject);
             }
         }
         return null;
-    }
-
-    public void setMarkerVisibility(MapObject placemark, boolean visibility) {
-        Marker marker = markerMap.get(placemark);
-        model.removeMarker(marker.getMarkerInfo());
-        marker.setVisible(visibility);
-        model.addMarker(marker.getMarkerInfo());
     }
 
     public void removeMarker(MapObject placemark) {
@@ -107,17 +102,17 @@ public class Presenter {
         return routeMap.get(polyline);
     }
 
-    public Track getTrack(MapObject polyline) {
+    public Route getTrack(MapObject polyline) {
         return trackMap.get(polyline);
     }
 
     public void removeRoute(MapObject polyline) {
-        routeMap.remove(polyline);
         model.removeRoute(routeMap.get(polyline).getRouteInfo());
+        routeMap.remove(polyline);
     }
 
     public void removeTrack(MapObject polyline) {
+        model.removeTrack(trackMap.get(polyline).getRouteInfo());
         trackMap.remove(polyline);
-        model.removeTrack(trackMap.get(polyline).getTrackInfo());
     }
 }
