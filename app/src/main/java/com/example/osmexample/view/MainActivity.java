@@ -90,11 +90,14 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private MapObjectCollection mapObjects = null;
     private MapObject clickedMarker = null;
+    private MapObject clickedRoute = null;
+    private MapObject clickedTrack = null;
     private ImageView centerMarker = null;
     private boolean isTracking = false;
     private List<Point> track = null;
     private List<PolylineMapObject> trackPolylines = null;
     private List<PolylineMapObject> routePolylines = null;
+    private PolylineMapObject routePolyline = null;
     private PedestrianRouter pedestrianRouter = null;
     private TextView emptyListText = null;
     private TextView listText = null;
@@ -103,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView createOrChangeDescriptionText = null;
     private ArrayList<ListItem> listMarkersItems;
     private ListItemsAdapter listMarkersAdapter;
+    private RadioButton mushroomRadioButton = null;
+    private RadioButton fishRadioButton = null;
+    private RadioButton walkRadioButton = null;
+    private FrameLayout saveOrChangeRouteLayout = null;
+    private Button createOrChangeButton = null;
+    private java.util.Map<ObjectType, Integer> imageViewMap = null;
 
 
     @SuppressLint("MissingPermission")
@@ -120,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         // Инициализация компонентов карты
         mapView = findViewById(R.id.mapview);
         mainLayout = findViewById(R.id.MainLayout);
-        setMarkerLayout = findViewById(R.id.createOrChangeLayout);
+        setMarkerLayout = findViewById(R.id.createFormLayout);
         markerInfoPanel = findViewById(R.id.markerInfoPanel);
         loadingScreen = findViewById(R.id.loadingScreen);
         menu = findViewById(R.id.menu);
@@ -134,8 +143,13 @@ public class MainActivity extends AppCompatActivity {
         createOrChangeInputNameText = findViewById(R.id.createOrChangeInputName);
         createOrChangeDescriptionText = findViewById(R.id.createOrChangeDescriptionText);
         createOrChangeInputDescriptionText = findViewById(R.id.createOrChangeInputDescription);
+        mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
+        fishRadioButton = findViewById(R.id.fishRadioButton);
+        walkRadioButton = findViewById(R.id.walkRadioButton);
         confirmationLayout = findViewById(R.id.confirmationLayout);
-        displayLayout = findViewById(R.id.displayLayout);
+        displayLayout = findViewById(R.id.visibilityListLayout);
+        saveOrChangeRouteLayout = findViewById(R.id.saveRouteLayout);
+        createOrChangeButton = findViewById(R.id.createOrChangeButton);
 
         // Определение местоположения
         requestLocationPermission();
@@ -149,8 +163,7 @@ public class MainActivity extends AppCompatActivity {
         addCurrentLocationMarker();
 
         // Загрузка сохраненных маркеров
-        List<MarkerInfo> markerInfos = presenter.getMarkerList();
-        for (MarkerInfo markerInfo : markerInfos) {
+        for (MarkerInfo markerInfo : presenter.getMarkerList()) {
             drawMarker(markerInfo);
         }
 //        // Загрузка сохраненных маршрутов
@@ -167,9 +180,7 @@ public class MainActivity extends AppCompatActivity {
         // Построитель маршрутов
         pedestrianRouter = TransportFactory.getInstance().createPedestrianRouter();
 
-
         // Обработчик долгого нажатия на карту
-
         mapView.getMap().addInputListener(longTapListener);
         Log.d("TagOnCreate", "Finish initialization " + userLocation.getLatitude() + " " + userLocation.getLongitude());
 
@@ -185,6 +196,12 @@ public class MainActivity extends AppCompatActivity {
             loadingScreen.setVisibility(View.GONE);
             mainLayout.setVisibility(View.VISIBLE);
         }, LOADING_SCREEN_TIME_OUT);
+
+        imageViewMap = new HashMap<>();
+        imageViewMap.put(ObjectType.DEFAULT, R.drawable.default_marker);
+        imageViewMap.put(ObjectType.MUSHROOM, R.drawable.mushroom_marker);
+        imageViewMap.put(ObjectType.FISH, R.drawable.fish_marker);
+        imageViewMap.put(ObjectType.WALK, R.drawable.walk_marker);
 
         // Создание меню
         createMenu();
@@ -224,12 +241,6 @@ public class MainActivity extends AppCompatActivity {
         // Для вывода меню на экран
         com.example.osmexample.view.MenuAdapter menuAdapter = new com.example.osmexample.view.MenuAdapter(this, menuItems);
         menu.setAdapter(menuAdapter);
-        // Создание мапы: тип метки - ссылка на изображение
-        java.util.Map<ObjectType, Integer> imageViewMap = new HashMap<>();
-        imageViewMap.put(ObjectType.DEFAULT, R.drawable.default_marker);
-        imageViewMap.put(ObjectType.MUSHROOM, R.drawable.mushroom_marker);
-        imageViewMap.put(ObjectType.FISH, R.drawable.fish_marker);
-        imageViewMap.put(ObjectType.WALK, R.drawable.walk_marker);
 
         menu.setOnItemClickListener((parent, view, position, id) -> {
             switch (position) {
@@ -248,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
+                            listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
                         listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
@@ -270,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
+                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
                         ListItemsAdapter listRoutesAdapter = new ListItemsAdapter(this, listRoutesItems);
@@ -292,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                         for (MarkerInfo markerInfo : presenter.getMarkerList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                             String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), formattedDateTime, R.drawable.garbage, R.drawable.visible));
+                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
                         ListItemsAdapter listTracksAdapter = new ListItemsAdapter(this, listTracksItems);
@@ -368,10 +379,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         mapView.onStop();
-
         // Сохранение JSON в файл
         presenter.saveData();
-
         MapKitFactory.getInstance().onStop();
         super.onStop();
     }
@@ -387,14 +396,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void drawMarker(MarkerInfo markerInfo) {
-        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
-        if (markerInfo.getMarkerType() == ObjectType.MUSHROOM) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
-        } else if (markerInfo.getMarkerType() == ObjectType.FISH) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
-        } else if (markerInfo.getMarkerType() == ObjectType.WALK) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
-        }
+        ImageProvider imageProvider = getImageProvider(markerInfo.getMarkerType());
         PlacemarkMapObject placemark = mapObjects.addPlacemark();
         placemark.setGeometry(markerInfo.getPoint());
         placemark.setIcon(imageProvider);
@@ -402,19 +404,13 @@ public class MainActivity extends AppCompatActivity {
         placemark.setTextStyle(new TextStyle().setPlacement(TextStyle.Placement.TOP));
         placemark.setIconStyle(new IconStyle().setScale(MARKER_SCALE).setAnchor(new PointF(0.5f, 1.0f)));
         placemark.addTapListener(onMarkerTapListener);
+        placemark.setVisible(markerInfo.isVisible());
         Marker marker = new Marker(placemark, markerInfo);
         presenter.addMarker(marker);
     }
 
     private void drawMarker(Point position, String name, String description, ObjectType type, LocalDateTime dateTime) {
-        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
-        if (type == ObjectType.MUSHROOM) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
-        } else if (type == ObjectType.FISH) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
-        } else if (type == ObjectType.WALK) {
-            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
-        }
+        ImageProvider imageProvider = getImageProvider(type);
         PlacemarkMapObject placemark = mapObjects.addPlacemark();
         placemark.setGeometry(position);
         placemark.setIcon(imageProvider);
@@ -425,6 +421,32 @@ public class MainActivity extends AppCompatActivity {
         presenter.addMarker(placemark, name, description, type, dateTime);
     }
 
+    private ImageProvider getImageProvider(ObjectType type) {
+        ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
+        if (type == ObjectType.MUSHROOM) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.mushroom_marker);
+        } else if (type == ObjectType.FISH) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.fish_marker);
+        } else if (type == ObjectType.WALK) {
+            imageProvider = ImageProvider.fromResource(this, R.drawable.walk_marker);
+        }
+        return imageProvider;
+    }
+
+    // Запрос разрешений на доступ к местоположению
+    private void requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                "android.permission.ACCESS_FINE_LOCATION")
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{"android.permission.ACCESS_FINE_LOCATION"},
+                    PERMISSIONS_REQUEST_FINE_LOCATION);
+        }
+    }
+
+    // Обработчики для главного экрана
+
+    // Обработчик нажатия кнопки текущего местоположения
     public void onMapCenterButtonClick(View view) {
         float currentZoom = mapView.getMap().getCameraPosition().getZoom();
         mapView.getMap().move(
@@ -434,6 +456,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    // Обработчик нажатия кнопки увеличения масштаба
     public void onPlusZoomButtonClick(View view) {
         Point currentPosition = mapView.getMap().getCameraPosition().getTarget();
         float currentZoom = mapView.getMap().getCameraPosition().getZoom();
@@ -444,6 +467,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    // Обработчик нажатия кнопки уменьшения масштаба
     public void onMinusZoomButtonClick(View view) {
         Point currentPosition = mapView.getMap().getCameraPosition().getTarget();
         float currentZoom = mapView.getMap().getCameraPosition().getZoom();
@@ -454,6 +478,73 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    // Обработчик кнопки "Меню" на карте
+    public void onMenuButtonClick(View view) {
+        menu.setVisibility(View.VISIBLE);
+        findViewById(R.id.menuButton).setVisibility(View.GONE);
+    }
+
+    // Обработчик кнопки "Отображение слоев"
+    public void onVisibilityListButtonClick(View view) {
+        displayLayout.setVisibility(View.VISIBLE);
+    }
+
+    // Обработчик нажатия кнопки "Запись трека"
+    public void onTrackingButtonClick(View view) {
+        Button trackingButton = findViewById(R.id.trackingButton);
+        if (!isTracking) {
+            trackPolylines = new ArrayList<>();
+            track = new ArrayList<>();
+            track.add(userLocation);
+            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green)));
+        } else {
+            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
+        }
+        isTracking = !isTracking;
+    }
+
+    // Обработчик нажатия кнопки "Найти маршрут"
+    public void onRouteButtonClick(View view) {
+        Toast.makeText(getApplicationContext(), "Поставьте маркер на место, куда прокладываем маршрут", Toast.LENGTH_LONG).show();
+
+        centerMarker.setVisibility(View.VISIBLE);
+        centerMarker.setOnClickListener(null);
+        centerMarker.setOnClickListener(this::onConfirmRouteMarkerClick);
+    }
+
+    // Обработчик нажатия на маркер при подтверждении маршрута
+    public void onConfirmRouteMarkerClick(View v) {
+        ArrayList<RequestPoint> requestPoints = new ArrayList<>();
+        ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
+                mapView.getMapWindow().height() / 2f);
+        Point destinationPoint = mapView.getMapWindow().screenToWorld(screenPoint);
+        //drawMarker(destinationPoint, "", "", ObjectType.DEFAULT, LocalDateTime.now());
+        requestPoints.add(new RequestPoint(userLocation, RequestPointType.WAYPOINT, null, null));
+        requestPoints.add(new RequestPoint(destinationPoint, RequestPointType.WAYPOINT, null, null));
+        TimeOptions timeOptions = new TimeOptions();
+        Session.RouteListener routeListener = new Session.RouteListener() {
+            @Override
+            public void onMasstransitRoutes(@NonNull List<com.yandex.mapkit.transport.masstransit.Route> list) {
+                routePolylines = new ArrayList<>();
+                PolylineMapObject polyline = mapObjects.addPolyline(list.get(0).getGeometry());
+                routePolylines.add(polyline);
+                routePolyline = polyline;
+                polyline.addTapListener(routePolylineTap);
+            }
+
+            @Override
+            public void onMasstransitRoutesError(@NonNull Error error) {
+                Toast.makeText(getApplicationContext(), "Ошибка построения маршрута", Toast.LENGTH_LONG).show();
+            }
+        };
+        pedestrianRouter.requestRoutes(requestPoints, timeOptions, routeListener);
+        centerMarker.setOnClickListener(null);
+        centerMarker.setVisibility(View.INVISIBLE);
+    }
+
+    // Обработчики экрана создания/изменения объектов
+
+    // Обработчик нажатия на центральный маркер при создании метки
     public void onCenterMarkerClick(View view) {;
         findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
         createOrChangeTitleText.setText("Создать метку");
@@ -461,11 +552,12 @@ public class MainActivity extends AppCompatActivity {
         createOrChangeInputNameText.setHint("Введите имя метки");
         createOrChangeDescriptionText.setText("Описание метки");
         createOrChangeInputDescriptionText.setHint("Введите описание метки");
-        // Тут надо установить слушателя на кнопку buttonCreateOrChange(buttonSave) для создания метки
         setMarkerLayout.setVisibility(View.VISIBLE);
+        createOrChangeButton.setOnClickListener(this::onCreateFormCreateOrChangeMarkerButtonClick);
     }
 
-    public void onCreateOrChangeButton(View view) {
+    //Обработчик нажатия кнопки "Сохранить" или "Изменить" для меток
+    public void onCreateFormCreateOrChangeMarkerButtonClick(View view) {
         ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
                 mapView.getMapWindow().height() / 2f);
         Point point = mapView.getMapWindow().screenToWorld(screenPoint);
@@ -474,9 +566,6 @@ public class MainActivity extends AppCompatActivity {
         TextView descriptionView = findViewById(R.id.createOrChangeInputDescription);
         String markerDescription = descriptionView.getText().toString();
         ObjectType markerType = ObjectType.DEFAULT;
-        RadioButton mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
-        RadioButton fishRadioButton = findViewById(R.id.fishRadioButton);
-        RadioButton walkRadioButton = findViewById(R.id.walkRadioButton);
         ImageProvider imageProvider = ImageProvider.fromResource(this, R.drawable.default_marker);
         if (mushroomRadioButton.isChecked()) {
             markerType = ObjectType.MUSHROOM;
@@ -518,18 +607,39 @@ public class MainActivity extends AppCompatActivity {
         setMarkerLayout.setVisibility(View.INVISIBLE);
     }
 
-    public void onCancelMarkerButton(View view) {
+    //Обработчик нажатия кнопки "Сохранить" для маршрутов
+    public void onCreateFormCreateRouteButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки "Изменить" для маршрутов
+    public void onCreateFormChangeRouteButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки "Сохранить" для треков
+    public void onCreateFormCreateTrackButtonClick(View view) {
+
+    }
+
+    //Обработчик нажатия кнопки"Изменить" для треков
+    public void onCreateFormChangeTrackButtonClick(View view) {
+
+    }
+
+    // Обработчик нажатия кнопки "Отмена" при создании/изменении объекта
+    public void onCreateFormCancelButton(View view) {
         setMarkerLayout.setVisibility(View.INVISIBLE);
         mainLayout.setVisibility(View.VISIBLE);
-        RadioButton mushroomRadioButton = findViewById(R.id.mushroomRadioButton);
-        RadioButton fishRadioButton = findViewById(R.id.fishRadioButton);
-        RadioButton walkRadioButton = findViewById(R.id.walkRadioButton);
         mushroomRadioButton.setChecked(false);
         fishRadioButton.setChecked(false);
         walkRadioButton.setChecked(false);
     }
 
-    public void onChangeMarkerButtonClicked(View view) {
+    // Обработчики экрана MarkerInfo
+
+    // Обработчик кнопки "Изменить"
+    public void onMarkerInfoChangeButtonClick(View view) {
         findViewById(R.id.centerMarker).setVisibility(View.INVISIBLE);
         createOrChangeTitleText.setText("Изменить метку");
         createOrChangeNameText.setText("Имя метки");
@@ -547,58 +657,40 @@ public class MainActivity extends AppCompatActivity {
         setMarkerLayout.setVisibility(View.VISIBLE);
     }
 
-    public void onDeleteMarkerButtonClicked(View view) {
+    public void onMarkerInfoDeleteButtonClick(View view) {
         mapObjects.remove(clickedMarker);
         presenter.removeMarker(clickedMarker);
         markerInfoPanel.setVisibility(View.INVISIBLE);
     }
 
-    public void onTrackingButtonClicked(View view) {
-        Button trackingButton = findViewById(R.id.trackingButton);
-        if (!isTracking) {
-            trackPolylines = new ArrayList<>();
-            track = new ArrayList<>();
-            track.add(userLocation);
-            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green)));
+    // Обработчик кнопки "Открыть список сохраненных меток"
+    public void onMarkerInfoOpenListButtonClick(View view) {
+        markerInfoPanel.setVisibility(View.INVISIBLE);
+
+        // Создание списка с сохраненными метками
+        if (presenter.getMarkerList().isEmpty()) {
+            emptyListText.setVisibility(View.VISIBLE);
         } else {
-            trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
+            listMarkersItems = new ArrayList<>();
+            for (MarkerInfo markerInfo : presenter.getMarkerList()) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String formattedDateTime = markerInfo.getDateTime().format(formatter);
+                listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
+            }
+
+            listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
+            listView.setAdapter(listMarkersAdapter);
+            emptyListText.setVisibility(View.INVISIBLE);
         }
-        isTracking = !isTracking;
+        mainLayout.setVisibility(View.GONE);
+        listText.setText("Мои метки");
+
+        listLayout.setVisibility(View.VISIBLE);
     }
 
-    public void onRouteButtonClicked(View view) {
-        Toast.makeText(getApplicationContext(), "Поставьте маркер на место, куда прокладываем маршрут", Toast.LENGTH_LONG).show();
-
-        centerMarker.setVisibility(View.VISIBLE);
-        centerMarker.setOnClickListener(null);
-        centerMarker.setOnClickListener(this::onConfirmRouteMarkerClicked);
-    }
-
-    public void onConfirmRouteMarkerClicked(View v) {
-        ArrayList<RequestPoint> requestPoints = new ArrayList<>();
-        ScreenPoint screenPoint = new ScreenPoint(mapView.getMapWindow().width() / 2f,
-                mapView.getMapWindow().height() / 2f);
-        Point destinationPoint = mapView.getMapWindow().screenToWorld(screenPoint);
-        drawMarker(destinationPoint, "", "", ObjectType.DEFAULT, LocalDateTime.now());
-        requestPoints.add(new RequestPoint(userLocation, RequestPointType.WAYPOINT, null, null));
-        requestPoints.add(new RequestPoint(destinationPoint, RequestPointType.WAYPOINT, null, null));
-        TimeOptions timeOptions = new TimeOptions();
-        Session.RouteListener routeListener = new Session.RouteListener() {
-            @Override
-            public void onMasstransitRoutes(@NonNull List<com.yandex.mapkit.transport.masstransit.Route> list) {
-                routePolylines = new ArrayList<>();
-                PolylineMapObject polyline = mapObjects.addPolyline(list.get(0).getGeometry());
-                routePolylines.add(polyline);
-            }
-
-            @Override
-            public void onMasstransitRoutesError(@NonNull Error error) {
-                Toast.makeText(getApplicationContext(), "Ошибка построения маршрута", Toast.LENGTH_LONG).show();
-            }
-        };
-        pedestrianRouter.requestRoutes(requestPoints, timeOptions, routeListener);
-        centerMarker.setOnClickListener(null);
-        centerMarker.setVisibility(View.INVISIBLE);
+    // Обработчик нажатия кнопки закрытия окна MarkerInfo
+    public void onMarkerInfoCloseButtonClick(View view) {
+        markerInfoPanel.setVisibility(View.INVISIBLE);
     }
 
     private final MapObjectTapListener onMarkerTapListener = (mapObject, point) -> {
@@ -624,52 +716,17 @@ public class MainActivity extends AppCompatActivity {
         return false;
     };
 
-    public void onCloseMarkerInfoButtonClicked(View view) {
-        markerInfoPanel.setVisibility(View.INVISIBLE);
-    }
-
-    // Запрос разрешений на доступ к местоположению
-    private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                "android.permission.ACCESS_FINE_LOCATION")
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{"android.permission.ACCESS_FINE_LOCATION"},
-                    PERMISSIONS_REQUEST_FINE_LOCATION);
-        }
-    }
-
-    // Обработчик кнопки "Меню" на карте
-    public void onMenuButtonClick(View view) {
-        menu.setVisibility(View.VISIBLE);
-        findViewById(R.id.menuButton).setVisibility(View.GONE);
-    }
+    // Обработчики окна со списоком сохраненных меток/маршрутов/треков
 
     // Обработчик кнопки "Закрыть" в окне со списками сохраненных меток/маршрутов/треков
-    public void onListCloseButtonClick(View view) {
+    public void onMarkerListCloseButtonClick(View view) {
         listLayout.setVisibility(View.GONE);
         mainLayout.setVisibility(View.VISIBLE);
         findViewById(R.id.menuButton).setVisibility(View.VISIBLE);
     }
 
-    // Обработчик кнопки "Открыть список сохраненных меток" в окне MarkerInfoPanel
-    public void onOpenListMarkersButtonClicked(View view) {
-        markerInfoPanel.setVisibility(View.INVISIBLE);
-        listLayout.setVisibility(View.VISIBLE);
-    }
-
-    // Обработчик кнопки "Отображение меток"
-    public void onDisplayButtonClick(View view) {
-        displayLayout.setVisibility(View.VISIBLE);
-    }
-
-    // Обработчик кнопки "Закрыть" в окне отображения меток
-    public void onDisplayLayoutButtonClick(View view) {
-        displayLayout.setVisibility(View.INVISIBLE);
-    }
-
     // Обработчик кнопки "Удалить" в окне со списками сохраненных меток
-    public void onDeleteButtonClick(int position) {
+    public void onMarkerListDeleteButtonClick(int position) {
         // Получаем выбранный элемент списка
         ListItem selectedItem = listMarkersItems.get(position);
 
@@ -678,8 +735,16 @@ public class MainActivity extends AppCompatActivity {
         Button confirmButton = findViewById(R.id.confirmButton);
         confirmButton.setOnClickListener(v -> {
             listMarkersItems.remove(selectedItem);
-            // Надо удалить метку из карты и добавить проверку на пустой список, если список пустой
-            // emptyListText.setVisibility(View.VISIBLE);
+
+            Marker deletedMarker = presenter.getMarker(position);
+
+            mapObjects.remove(deletedMarker.getPlacemark());
+            presenter.removeMarker(deletedMarker.getPlacemark());
+
+            if (presenter.getMarkerList().isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
+            }
+
             listMarkersAdapter.notifyDataSetChanged();
             confirmationLayout.setVisibility(View.INVISIBLE);
         });
@@ -688,16 +753,92 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Обработчик кнопки "Отобразить" в окне со списками сохраненных меток
-    public void onDisplayButtonClick(int position) {
+    public void onMarkerListSetVisibleButtonClick(int position) {
         // Получаем выбранный элемент списка
         ListItem selectedItem = listMarkersItems.get(position);
 
+        Marker selectedMarker = presenter.getMarker(position);
+
         // Меняем изображение кнопки displayButton
-        if (selectedItem.getImageId3() == R.drawable.visible) {
+        if (selectedMarker.isVisible()) {
             selectedItem.setImageId3(R.drawable.invisible);
+            selectedMarker.getPlacemark().setVisible(false);
+            presenter.setMarkerVisibility(selectedMarker.getPlacemark(), false);
         } else {
             selectedItem.setImageId3(R.drawable.visible);
+            selectedMarker.getPlacemark().setVisible(true);
+            presenter.setMarkerVisibility(selectedMarker.getPlacemark(), true);
         }
         listMarkersAdapter.notifyDataSetChanged();
+
+
     }
+
+    public void onSaveRouteCloseButtonClick(View view) {
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+    }
+
+    public void onSaveRouteDeleteButtonClick(View view) {
+        mapObjects.remove(clickedRoute);
+        presenter.removeRoute(clickedRoute);
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+    }
+
+    public void onSaveRouteSaveButtonClick(View view) {
+        createOrChangeTitleText.setText("Сохранить маршрут");
+        createOrChangeNameText.setText("Имя маршрута");
+        createOrChangeDescriptionText.setText("Описание маршрута");
+
+        createOrChangeInputNameText.setHint("Введите имя маршрута");
+        createOrChangeInputDescriptionText.setHint("Введите описание маршрута");
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onSaveRouteChangeButtonClick(View view) {
+        createOrChangeTitleText.setText("Изменить маршрут");
+        createOrChangeNameText.setText("Имя маршрута");
+        createOrChangeDescriptionText.setText("Описание маршрута");
+
+        com.example.osmexample.presenter.Route route = presenter.getRoute(clickedRoute);
+        createOrChangeInputNameText.setText(route.getName());
+        createOrChangeInputDescriptionText.setHint(route.getDescription());
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+        setMarkerLayout.setVisibility(View.VISIBLE);
+    }
+
+    // Обработчики окна изменения параметров отображения меток/маршрутов/треков
+
+    // Обработчик кнопки "Закрыть" в окне отображения меток
+    public void onVisibilityListCloseButtonClick(View view) {
+        displayLayout.setVisibility(View.INVISIBLE);
+    }
+
+    // Обработчик нажатия на маршрут
+    private final MapObjectTapListener routePolylineTap = (mapObject, point) -> {
+        clickedRoute = mapObject;
+        Button saveOrChangeButton = findViewById(R.id.doTrackOrRouteButton);
+        if (presenter.getRoute(mapObject) == null) {
+            saveOrChangeButton.setText("Сохранить");
+            saveOrChangeButton.setOnClickListener(this::onSaveRouteSaveButtonClick);
+        } else {
+            saveOrChangeButton.setText("Изменить");
+            saveOrChangeButton.setOnClickListener(this::onSaveRouteChangeButtonClick);
+        }
+        saveOrChangeRouteLayout.setVisibility(View.VISIBLE);
+        return false;
+    };
+
+    // Обработчик нажатия на трек
+    private final MapObjectTapListener trackPolylineTap = (mapObject, point) -> {
+        clickedTrack = mapObject;
+        Button saveOrChangeButton = findViewById(R.id.doTrackOrRouteButton);
+        if (presenter.getTrack(mapObject) == null) {
+            saveOrChangeButton.setText("Сохранить");
+        } else {
+            saveOrChangeButton.setText("Изменить");
+        }
+        saveOrChangeRouteLayout.setVisibility(View.VISIBLE);
+        return false;
+    };
 }

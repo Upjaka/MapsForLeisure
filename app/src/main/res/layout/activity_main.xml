@@ -2,6 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -59,7 +60,7 @@
                 android:layout_gravity="right"
                 android:layout_marginTop="10dp"
                 android:layout_marginRight="10dp"
-                android:onClick="onCloseMarkerInfoButtonClicked"
+                android:onClick="onMarkerInfoCloseButtonClick"
                 android:src="@drawable/close" />
         </FrameLayout>
 
@@ -90,7 +91,7 @@
                 android:layout_gravity="bottom|left"
                 android:layout_marginLeft="25dp"
                 android:layout_marginBottom="25dp"
-                android:onClick="onChangeMarkerButtonClicked"
+                android:onClick="onMarkerInfoChangeButtonClick"
                 android:src="@drawable/edit" />
 
             <ImageView
@@ -99,7 +100,7 @@
                 android:layout_height="50dp"
                 android:layout_gravity="bottom|center"
                 android:layout_marginBottom="25dp"
-                android:onClick="onOpenListMarkersButtonClicked"
+                android:onClick="onMarkerInfoOpenListButtonClick"
                 android:src="@drawable/list_markers" />
 
             <ImageView
@@ -109,7 +110,7 @@
                 android:layout_gravity="bottom|right"
                 android:layout_marginRight="25dp"
                 android:layout_marginBottom="25dp"
-                android:onClick="onDeleteMarkerButtonClicked"
+                android:onClick="onMarkerInfoDeleteButtonClick"
                 android:src="@drawable/garbage" />
         </FrameLayout>
     </LinearLayout>
@@ -149,7 +150,7 @@
                 android:layout_gravity="right"
                 android:layout_marginStart="100dp"
                 android:alpha="0.7"
-                android:onClick="onListCloseButtonClick"
+                android:onClick="onMarkerListCloseButtonClick"
                 android:src="@drawable/close" />
         </LinearLayout>
 
@@ -159,8 +160,8 @@
             android:layout_height="150dp"
             android:layout_gravity="center"
             android:background="#9CCC65"
-            android:visibility="invisible"
-            android:translationZ="3dp">
+            android:translationZ="3dp"
+            android:visibility="invisible">
 
             <TextView
                 android:id="@+id/confirmationText"
@@ -182,10 +183,10 @@
                 android:layout_marginBottom="10dp"
                 android:backgroundTint="#FFD54F"
                 android:text="@string/cancelButtonText"
-                android:textSize="12sp"
                 android:textAllCaps="false"
+                android:textSize="12sp"
                 app:strokeColor="#FF6F00"
-                app:strokeWidth="3dp"/>
+                app:strokeWidth="3dp" />
 
             <Button
                 android:id="@+id/confirmButton"
@@ -196,8 +197,8 @@
                 android:layout_marginBottom="10dp"
                 android:backgroundTint="#FFD54F"
                 android:text="@string/confirmButtonText"
-                android:textSize="11sp"
                 android:textAllCaps="false"
+                android:textSize="11sp"
                 app:strokeColor="#FF6F00"
                 app:strokeWidth="3dp" />
         </FrameLayout>
@@ -248,7 +249,7 @@
             android:layout_marginBottom="20dp"
             android:alpha="0.75"
             android:backgroundTint="#FFFFFF"
-            android:onClick="onTrackingButtonClicked"
+            android:onClick="onTrackingButtonClick"
             android:text="Запись трека"
             android:textColor="#000000"
             android:textSize="12sp"
@@ -267,7 +268,7 @@
             android:layout_marginBottom="20dp"
             android:alpha="0.75"
             android:backgroundTint="#FFFFFF"
-            android:onClick="onRouteButtonClicked"
+            android:onClick="onRouteButtonClick"
             android:text="Найти маршрут"
             android:textColor="#000000"
             android:textSize="12sp"
@@ -278,7 +279,7 @@
             app:iconTint="#000000" />
 
         <ImageView
-            android:id="@+id/displayButton"
+            android:id="@+id/visibilityListButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="bottom|right"
@@ -286,7 +287,7 @@
             android:layout_marginBottom="20dp"
             android:alpha="0.8"
             android:background="#FFFFFF"
-            android:onClick="onDisplayButtonClick"
+            android:onClick="onVisibilityListButtonClick"
             android:src="@drawable/display"
             android:translationZ="2dp" />
 
@@ -343,8 +344,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:onClick="onCenterMarkerClick"
-            android:scaleX="0.05"
-            android:scaleY="0.05"
+            android:scaleX="0.07"
+            android:scaleY="0.07"
             android:src="@drawable/default_marker"
             android:translationY="-29px"
             android:translationZ="1dp"
@@ -356,7 +357,7 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
-            android:id="@+id/createOrChangeLayout"
+            android:id="@+id/createFormLayout"
             android:layout_width="match_parent"
             android:layout_height="500dp"
             android:layout_gravity="bottom"
@@ -405,6 +406,7 @@
                 android:inputType="textMultiLine" />
 
             <TextView
+                android:id="@+id/createOrChangeTypeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/MarkerTypeCheckboxText"
@@ -485,12 +487,12 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/buttonCreateOrChange"
+                    android:id="@+id/createOrChangeButton"
                     android:layout_width="140dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:backgroundTint="#FFD54F"
-                    android:onClick="onCreateOrChangeButton"
+                    android:onClick="onCreateFormCreateOrChangeMarkerButtonClick"
                     android:text="@string/SaveButtonText"
                     android:textColor="#000000"
                     app:strokeColor="#FF6F00"
@@ -502,12 +504,12 @@
                     android:layout_weight="1" />
 
                 <Button
-                    android:id="@+id/buttonCancel"
+                    android:id="@+id/cancelCreateButton"
                     android:layout_width="140dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:backgroundTint="#FFD54F"
-                    android:onClick="onCancelMarkerButton"
+                    android:onClick="onCreateFormCancelButton"
                     android:text="@string/CancelButtonText"
                     android:textColor="#000000"
                     android:textSize="14sp"
@@ -518,7 +520,7 @@
         </LinearLayout>
 
         <FrameLayout
-            android:id="@+id/displayLayout"
+            android:id="@+id/visibilityListLayout"
             android:layout_width="250dp"
             android:layout_height="120dp"
             android:layout_gravity="bottom|right"
@@ -536,7 +538,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:alpha="1"
-                android:onClick="onDisplayLayoutButtonClick"
+                android:onClick="onVisibilityListCloseButtonClick"
                 android:src="@drawable/close" />
 
             <TextView
@@ -615,7 +617,7 @@
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/trackOrRouteLayout"
+            android:id="@+id/saveRouteLayout"
             android:layout_width="250dp"
             android:layout_height="130dp"
             android:layout_gravity="bottom"
@@ -632,7 +634,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="5dp"
                 android:alpha="1"
-                android:onClick="onDisplayLayoutButtonClick"
+                android:onClick="onSaveRouteCloseButtonClick"
                 android:src="@drawable/close" />
 
             <TextView
@@ -653,6 +655,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:backgroundTint="#FFD54F"
+                android:onClick="onSaveRouteDeleteButtonClick"
                 android:text="@string/deleteTrackOrRouteButtonText"
                 android:textAllCaps="false"
                 android:textSize="12sp"

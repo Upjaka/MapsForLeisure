@@ -48,8 +48,8 @@ public class ListItemsAdapter extends ArrayAdapter<ListItem> {
             holder.imageButton1.setImageResource(item.getImageId2());
             holder.imageButton2.setImageResource(item.getImageId3());
             // Обработчики кнопок
-            holder.imageButton1.setOnClickListener(v -> ((MainActivity) getContext()).onDeleteButtonClick(position));
-            holder.imageButton2.setOnClickListener(v -> ((MainActivity) getContext()).onDisplayButtonClick(position));
+            holder.imageButton1.setOnClickListener(v -> ((MainActivity) getContext()).onMarkerListDeleteButtonClick(position));
+            holder.imageButton2.setOnClickListener(v -> ((MainActivity) getContext()).onMarkerListSetVisibleButtonClick(position));
         }
 
         return convertView;
