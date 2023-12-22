@@ -112,7 +112,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView createOrChangeNameText = null;
     private TextView createOrChangeDescriptionText = null;
     private ArrayList<ListItem> listMarkersItems;
-    private ListItemsAdapter listMarkersAdapter;
+    private ArrayList<ListItem> listRoutesItems;
+    private ArrayList<ListItem> listTracksItems;
+    private ListMarkersAdapter listMarkersAdapter;
+    private ListRoutesAdapter listRoutesAdapter;
+    private ListTracksAdapter listTracksAdapter;
     private RadioButton mushroomRadioButton = null;
     private RadioButton fishRadioButton = null;
     private RadioButton walkRadioButton = null;
@@ -274,8 +278,9 @@ public class MainActivity extends AppCompatActivity {
                             listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
-                        listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
+                        listMarkersAdapter = new ListMarkersAdapter(this, listMarkersItems);
                         listView.setAdapter(listMarkersAdapter);
+                        listView.setVisibility(View.VISIBLE);
                         emptyListText.setVisibility(View.INVISIBLE);
                     }
                     mainLayout.setVisibility(View.GONE);
@@ -284,20 +289,21 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 2:
                     // Действие для "Мои маршруты"
-                    if (presenter.getMarkerList().isEmpty()) {
+                    if (presenter.getRouteList().isEmpty()) {
                         listView.setVisibility(View.INVISIBLE);
                         emptyListText.setText("У вас пока нет маршрутов");
                         emptyListText.setVisibility(View.VISIBLE);
                     } else {
-                        ArrayList<ListItem> listRoutesItems = new ArrayList<>();
-                        for (MarkerInfo markerInfo : presenter.getMarkerList()) {
+                        listRoutesItems = new ArrayList<>();
+                        for (RouteInfo routeInfo : presenter.getRouteList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                            String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listRoutesItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
+                            String formattedDateTime = routeInfo.getDateTime().format(formatter);
+                            listRoutesItems.add(new ListItem(imageViewMap.get(routeInfo.getRouteType()), routeInfo.getName(), routeInfo.getDescription(), routeInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
-                        ListItemsAdapter listRoutesAdapter = new ListItemsAdapter(this, listRoutesItems);
+                        listRoutesAdapter = new ListRoutesAdapter(this, listRoutesItems);
                         listView.setAdapter(listRoutesAdapter);
+                        listView.setVisibility(View.VISIBLE);
                         emptyListText.setVisibility(View.INVISIBLE);
                     }
                     mainLayout.setVisibility(View.GONE);
@@ -306,20 +312,21 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 3:
                     // Действие для "Мои треки"
-                    if (presenter.getMarkerList().isEmpty()) {
+                    if (presenter.getTrackList().isEmpty()) {
                         listView.setVisibility(View.INVISIBLE);
                         emptyListText.setText("У вас пока нет треков");
                         emptyListText.setVisibility(View.VISIBLE);
                     } else {
-                        ArrayList<ListItem> listTracksItems = new ArrayList<>();
-                        for (MarkerInfo markerInfo : presenter.getMarkerList()) {
+                        listTracksItems = new ArrayList<>();
+                        for (RouteInfo trackInfo : presenter.getTrackList()) {
                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                            String formattedDateTime = markerInfo.getDateTime().format(formatter);
-                            listTracksItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
+                            String formattedDateTime = trackInfo.getDateTime().format(formatter);
+                            listTracksItems.add(new ListItem(imageViewMap.get(trackInfo.getRouteType()), trackInfo.getName(), trackInfo.getDescription(), trackInfo.isVisible(), formattedDateTime, R.drawable.garbage));
                         }
 
-                        ListItemsAdapter listTracksAdapter = new ListItemsAdapter(this, listTracksItems);
+                        listTracksAdapter = new ListTracksAdapter(this, listTracksItems);
                         listView.setAdapter(listTracksAdapter);
+                        listView.setVisibility(View.VISIBLE);
                         emptyListText.setVisibility(View.INVISIBLE);
                     }
                     mainLayout.setVisibility(View.GONE);
@@ -806,7 +813,7 @@ public class MainActivity extends AppCompatActivity {
                 listMarkersItems.add(new ListItem(imageViewMap.get(markerInfo.getMarkerType()), markerInfo.getName(), markerInfo.getDescription(), markerInfo.isVisible(), formattedDateTime, R.drawable.garbage));
             }
 
-            listMarkersAdapter = new ListItemsAdapter(this, listMarkersItems);
+            listMarkersAdapter = new ListMarkersAdapter(this, listMarkersItems);
             listView.setAdapter(listMarkersAdapter);
             emptyListText.setVisibility(View.INVISIBLE);
         }
@@ -837,6 +844,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Показываем окно с подтверждением удаления
         confirmationLayout.setVisibility(View.VISIBLE);
+        TextView confirmationText = findViewById(R.id.confirmationText);
+        confirmationText.setText("Вы точно хотите удалить метку?");
         Button confirmButton = findViewById(R.id.confirmButton);
         confirmButton.setOnClickListener(v -> {
             listMarkersItems.remove(selectedItem);
@@ -1027,5 +1036,99 @@ public class MainActivity extends AppCompatActivity {
     public void onNewPasswordLayoutReturnToLoginButtonClick(View view) {
         newPasswordLayout.setVisibility(View.INVISIBLE);
         authorizationLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onRouteListDeleteButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listRoutesItems.get(position);
+
+        // Показываем окно с подтверждением удаления
+        confirmationLayout.setVisibility(View.VISIBLE);
+        TextView confirmationText = findViewById(R.id.confirmationText);
+        confirmationText.setText("Вы точно хотите удалить маршрут?");
+        Button confirmButton = findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(v -> {
+            listRoutesItems.remove(selectedItem);
+
+            //Route deletedRoute = presenter.getRoute(position);
+
+            //mapObjects.remove(deletedRoute.getPlacemark());
+            //presenter.removeMarker(deletedRoute.getPlacemark());
+
+            if (presenter.getRouteList().isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
+            }
+
+            listRoutesAdapter.notifyDataSetChanged();
+            confirmationLayout.setVisibility(View.INVISIBLE);
+        });
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
+    }
+
+    public void onRouteListSetVisibleButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listRoutesItems.get(position);
+
+        //Route selectedRoute = presenter.getRoute(position);
+
+        // Меняем изображение кнопки displayButton
+        /*if (selectedRoute.isVisible()) {
+            selectedItem.setImageId3(R.drawable.invisible);
+            selectedRoute.getPlacemark().setVisible(false);
+            selectedRoute.setVisible(false);
+        } else {
+            selectedItem.setImageId3(R.drawable.visible);
+            selectedRoute.getPlacemark().setVisible(true);
+            selectedRoute.setVisible(true);
+        }*/
+        listRoutesAdapter.notifyDataSetChanged();
+    }
+
+    public void onTrackListDeleteButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listTracksItems.get(position);
+
+        // Показываем окно с подтверждением удаления
+        confirmationLayout.setVisibility(View.VISIBLE);
+        TextView confirmationText = findViewById(R.id.confirmationText);
+        confirmationText.setText("Вы точно хотите удалить трек?");
+        Button confirmButton = findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(v -> {
+            listTracksItems.remove(selectedItem);
+
+            //Route deletedRoute = presenter.getRoute(position);
+
+            //mapObjects.remove(deletedRoute.getPlacemark());
+            //presenter.removeMarker(deletedRoute.getPlacemark());
+
+            if (presenter.getRouteList().isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
+            }
+
+            listTracksAdapter.notifyDataSetChanged();
+            confirmationLayout.setVisibility(View.INVISIBLE);
+        });
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
+    }
+
+    public void onTrackListSetVisibleButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listTracksItems.get(position);
+
+        //Route selectedTrack = presenter.getTrack(position);
+
+        // Меняем изображение кнопки displayButton
+        /*if (selectedRoute.isVisible()) {
+            selectedItem.setImageId3(R.drawable.invisible);
+            selectedRoute.getPlacemark().setVisible(false);
+            selectedRoute.setVisible(false);
+        } else {
+            selectedItem.setImageId3(R.drawable.visible);
+            selectedRoute.getPlacemark().setVisible(true);
+            selectedRoute.setVisible(true);
+        }*/
+        listTracksAdapter.notifyDataSetChanged();
     }
 }
