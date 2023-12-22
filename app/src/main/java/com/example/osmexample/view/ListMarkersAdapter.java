@@ -14,8 +14,8 @@ import com.example.osmexample.R;
 
 import java.util.List;
 
-public class ListItemsAdapter extends ArrayAdapter<ListItem> {
-    public ListItemsAdapter(Context context, List<ListItem> itemList) {
+public class ListMarkersAdapter extends ArrayAdapter<ListItem> {
+    public ListMarkersAdapter(Context context, List<ListItem> itemList) {
         super(context, 0, itemList);
     }
 
