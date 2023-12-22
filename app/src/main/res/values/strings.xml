@@ -21,4 +21,24 @@
     <string name="trackOrRouteLayoutText">Что вы хотите сделать с выбранным объектом?</string>
     <string name="doTrackOrRouteButtonText">Изменить</string>
     <string name="deleteTrackOrRouteButtonText">Удалить</string>
+    <string name="mushroomHuntingText">Грибная охота - это маленькая жизнь</string>
+    <string name="anglerText">Время, проведенное на рыбалке, в счет жизни не идет!</string>
+    <string name="registrationButtonText">Регистрация</string>
+    <string name="loginButtonText">Войти</string>
+    <string name="haveAccountText">Уже есть аккаунт</string>
+    <string name="createAccountButtonText">Зарегистрироваться</string>
+    <string name="inputNewEmail">Введите почту</string>
+    <string name="inputNewNameText">Введите имя</string>
+    <string name="createAccountText">Регистрация</string>
+    <string name="inputNewPassword">Введите пароль</string>
+    <string name="createNewAccountButtonText">Создать аккаунт</string>
+    <string name="forgotPasswordButtonText">Забыл пароль</string>
+    <string name="authorizationButtonText">Войти</string>
+    <string name="inputPasswordText">Введите пароль</string>
+    <string name="inputEmailAddressText">Введите почту</string>
+    <string name="authorizationText">Вход</string>
+    <string name="rememberCheckBoxText">Запомни меня</string>
+    <string name="passwordRecoveryText">Восстановление пароля</string>
+    <string name="newPasswordText">Чтобы восстановить пароль, введите адрес вашей электронной почты</string>
+    <string name="getNewPasswordButtonText">Получить новый пароль</string>
 </resources>

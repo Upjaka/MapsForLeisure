@@ -88,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout displayLayout = null;
     private LinearLayout createFormLayout = null;
     private LinearLayout markerInfoPanel = null;
+    private LinearLayout startScreen = null;
+    private LinearLayout createAccountLayout = null;
+    private LinearLayout authorizationLayout = null;
+    private LinearLayout newPasswordLayout = null;
     private ListView menu = null;
     private ListView listView = null;
     private LocationManager locationManager;
@@ -155,6 +159,10 @@ public class MainActivity extends AppCompatActivity {
         displayLayout = findViewById(R.id.visibilityListLayout);
         saveOrChangeRouteLayout = findViewById(R.id.saveRouteLayout);
         createOrChangeButton = findViewById(R.id.createOrChangeButton);
+        startScreen = findViewById(R.id.startScreen);
+        createAccountLayout = findViewById(R.id.createAccountLayout);
+        authorizationLayout = findViewById(R.id.authorizationLayout);
+        newPasswordLayout = findViewById(R.id.newPasswordLayout);
         deleteTrackOrRouteButton = findViewById(R.id.deleteTrackOrRouteButton);
 
         // Определение местоположения
@@ -198,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         // Закрытие загрузочного окна через секунду
         new Handler().postDelayed(() -> {
             loadingScreen.setVisibility(View.GONE);
-            mainLayout.setVisibility(View.VISIBLE);
+            startScreen.setVisibility(View.VISIBLE);
         }, LOADING_SCREEN_TIME_OUT);
 
         imageViewMap = new HashMap<>();
@@ -963,4 +971,61 @@ public class MainActivity extends AppCompatActivity {
         deleteTrackOrRouteButton.setOnClickListener(this::onSaveRouteDeleteTrackButtonClick);
         return false;
     };
+
+    public void onStartScreenRegistrationButtonClick(View view) {
+        startScreen.setVisibility(View.INVISIBLE);
+        createAccountLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onStartScreenLoginButtonClick(View view) {
+        startScreen.setVisibility(View.INVISIBLE);
+        authorizationLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onCreateAccountLayoutCreateAccountButtonClick(View view) {
+        createAccountLayout.setVisibility(View.INVISIBLE);
+        authorizationLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onCreateAccountLayoutHaveAccountButtonClick(View view) {
+        createAccountLayout.setVisibility(View.INVISIBLE);
+        authorizationLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onAuthorizationLayoutAuthorizationButtonClick(View view) {
+        authorizationLayout.setVisibility(View.INVISIBLE);
+        mainLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onAuthorizationLayoutForgotPasswordButtonClick(View view) {
+        TextView newPasswordText = findViewById(R.id.newPasswordText);
+        newPasswordText.setText("Чтобы восстановить пароль, введите адрес вашей электронной почты");
+        EditText inputEmail = findViewById(R.id.inputEmail);
+        inputEmail.setVisibility(View.VISIBLE);
+        Button getNewPasswordButton = findViewById(R.id.getNewPasswoButton);
+        getNewPasswordButton.setText("Получить новый пароль");
+        getNewPasswordButton.setOnClickListener(this::onNewPasswordLayoutGetNewPasswordButtonClick);
+        authorizationLayout.setVisibility(View.INVISIBLE);
+        newPasswordLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onAuthorizationLayoutCreateNewAccountButtonClick(View view) {
+        authorizationLayout.setVisibility(View.INVISIBLE);
+        createAccountLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onNewPasswordLayoutGetNewPasswordButtonClick(View view) {
+        TextView newPasswordText = findViewById(R.id.newPasswordText);
+        newPasswordText.setText("Мы отправили вам на почту новый пароль");
+        EditText inputEmail = findViewById(R.id.inputEmail);
+        inputEmail.setVisibility(View.INVISIBLE);
+        Button returnToLoginButton = findViewById(R.id.getNewPasswoButton);
+        returnToLoginButton.setText("Вернуться ко входу");
+        returnToLoginButton.setOnClickListener(this::onNewPasswordLayoutReturnToLoginButtonClick);
+    }
+
+    public void onNewPasswordLayoutReturnToLoginButtonClick(View view) {
+        newPasswordLayout.setVisibility(View.INVISIBLE);
+        authorizationLayout.setVisibility(View.VISIBLE);
+    }
 }
