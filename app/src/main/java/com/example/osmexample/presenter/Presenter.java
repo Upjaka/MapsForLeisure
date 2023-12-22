@@ -32,10 +32,6 @@ public class Presenter {
         model.saveDataToFiles();
     }
 
-    public void loadData() {
-        model.loadDataFromFiles();
-    }
-
     public List<MarkerInfo> getMarkerList() {
         return model.getMarkerList();
     }
@@ -84,18 +80,11 @@ public class Presenter {
         for (MapObject mapObject : markerMap.keySet()) {
             PlacemarkMapObject placemark = (PlacemarkMapObject) mapObject;
             if (placemark.getGeometry().getLongitude() == point.getLongitude()
-                && placemark.getGeometry().getLatitude() == point.getLatitude()) {
+                    && placemark.getGeometry().getLatitude() == point.getLatitude()) {
                 return markerMap.get(mapObject);
             }
         }
         return null;
-    }
-
-    public void setMarkerVisibility(MapObject placemark, boolean visibility) {
-        Marker marker = markerMap.get(placemark);
-        model.removeMarker(marker.getMarkerInfo());
-        marker.setVisible(visibility);
-        model.addMarker(marker.getMarkerInfo());
     }
 
     public void removeMarker(MapObject placemark) {
@@ -112,8 +101,8 @@ public class Presenter {
     }
 
     public void removeRoute(MapObject polyline) {
-        routeMap.remove(polyline);
         model.removeRoute(routeMap.get(polyline).getRouteInfo());
+        routeMap.remove(polyline);
     }
 
     public void removeTrack(MapObject polyline) {
