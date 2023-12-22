@@ -97,7 +97,7 @@ public class FileManager {
         //new File(getFilesDir() + "/tracks.json").delete();
         Gson gson = new Gson();
         ArrayList<RouteInfo> tracks;
-        try (FileReader reader = new FileReader(filesDir + "/trracks.json")) {
+        try (FileReader reader = new FileReader(filesDir + "/tracks.json")) {
             Type listType = new TypeToken<ArrayList<RouteInfo>>() {
             }.getType();
             tracks = gson.fromJson(reader, listType);

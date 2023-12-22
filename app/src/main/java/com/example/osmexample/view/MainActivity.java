@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.location.Location;
 import android.location.LocationListener;
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     private PolylineMapObject clickedTrack = null;
     private ImageView centerMarker = null;
     private boolean isTracking = false;
-    private List<Point> track = null;
+    private List<Point> trackPoints = null;
     private List<PolylineMapObject> trackPolylines = null;
     private List<PolylineMapObject> routePolylines = null;
     private PolylineMapObject routePolyline = null;
@@ -113,7 +114,9 @@ public class MainActivity extends AppCompatActivity {
     private RadioButton walkRadioButton = null;
     private FrameLayout saveOrChangeRouteLayout = null;
     private Button createOrChangeButton = null;
+    private Button deleteTrackOrRouteButton = null;
     private java.util.Map<ObjectType, Integer> imageViewMap = null;
+    private int trackColor = Color.rgb(50, 205, 50);
 
 
     @SuppressLint("MissingPermission")
@@ -152,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         displayLayout = findViewById(R.id.visibilityListLayout);
         saveOrChangeRouteLayout = findViewById(R.id.saveRouteLayout);
         createOrChangeButton = findViewById(R.id.createOrChangeButton);
+        deleteTrackOrRouteButton = findViewById(R.id.deleteTrackOrRouteButton);
 
         // Определение местоположения
         requestLocationPermission();
@@ -171,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
         // Загрузка сохраненных маршрутов
         for (RouteInfo routeInfo : presenter.getRouteList()) {
             drawRoute(routeInfo);
+        }
+        // Загрузка сохраненных треков
+        for (RouteInfo trackInfo : presenter.getTrackList()) {
+            drawTrack(trackInfo);
         }
 
         // Построитель маршрутов
@@ -329,8 +337,9 @@ public class MainActivity extends AppCompatActivity {
                 list.add(oldLocation);
                 list.add(userLocation);
                 PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(list));
+                polyline.setStrokeColor(trackColor);
                 trackPolylines.add(polyline);
-                track.add(userLocation);
+                trackPoints.add(userLocation);
             }
         }
 
@@ -419,8 +428,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawRoute(RouteInfo routeInfo) {
         PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(routeInfo.getPoints()));
+        polyline.addTapListener(routePolylineTap);
         Route route = new Route(polyline, routeInfo);
         presenter.addRoute(route);
+    }
+
+    private void drawTrack(RouteInfo trackInfo) {
+        PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(trackInfo.getPoints()));
+        polyline.setStrokeColor(trackColor);
+        polyline.addTapListener(trackPolylineTap);
+        Route track = new Route(polyline, trackInfo);
+        presenter.addTrack(track);
     }
 
     // Обработчик нажатия на метку
@@ -540,11 +558,17 @@ public class MainActivity extends AppCompatActivity {
         Button trackingButton = findViewById(R.id.trackingButton);
         if (!isTracking) {
             trackPolylines = new ArrayList<>();
-            track = new ArrayList<>();
-            track.add(userLocation);
+            trackPoints = new ArrayList<>();
+            trackPoints.add(userLocation);
             trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.green)));
         } else {
             trackingButton.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
+            for (PolylineMapObject polyline : trackPolylines) {
+                mapObjects.remove(polyline);
+            }
+            PolylineMapObject trackPolyline = mapObjects.addPolyline(new Polyline(trackPoints));
+            trackPolyline.setStrokeColor(Color.rgb(34, 139, 34));
+            trackPolyline.addTapListener(trackPolylineTap);
         }
         isTracking = !isTracking;
     }
@@ -689,12 +713,45 @@ public class MainActivity extends AppCompatActivity {
 
     //Обработчик нажатия кнопки "Сохранить" для треков
     public void onCreateFormCreateTrackButtonClick(View view) {
+        String trackName = createOrChangeInputNameText.getText().toString();
+        String trackDescription = createOrChangeInputDescriptionText.getText().toString();
+        ObjectType trackType = ObjectType.DEFAULT;
+        if (mushroomRadioButton.isChecked()) {
+            trackType = ObjectType.MUSHROOM;
+            mushroomRadioButton.setChecked(false);
+        } else if (fishRadioButton.isChecked()) {
+            trackType = ObjectType.FISH;
+            fishRadioButton.setChecked(false);
+        } else if (walkRadioButton.isChecked()) {
+            trackType = ObjectType.WALK;
+            walkRadioButton.setChecked(false);
+        }
+        presenter.addTrack(clickedTrack, trackName, trackDescription, trackType, LocalDateTime.now());
 
+        closeCreateFormLayout();
     }
 
-    //Обработчик нажатия кнопки"Изменить" для треков
+    //Обработчик нажатия кнопки "Изменить" для треков
     public void onCreateFormChangeTrackButtonClick(View view) {
+        String trackName = createOrChangeInputNameText.getText().toString();
+        String trackDescription = createOrChangeInputDescriptionText.getText().toString();
+        ObjectType trackType = ObjectType.DEFAULT;
+        if (mushroomRadioButton.isChecked()) {
+            trackType = ObjectType.MUSHROOM;
+            mushroomRadioButton.setChecked(false);
+        } else if (fishRadioButton.isChecked()) {
+            trackType = ObjectType.FISH;
+            fishRadioButton.setChecked(false);
+        } else if (walkRadioButton.isChecked()) {
+            trackType = ObjectType.WALK;
+            walkRadioButton.setChecked(false);
+        }
+        Route route = presenter.getTrack(clickedTrack);
+        route.setName(trackName);
+        route.setDescription(trackDescription);
+        route.setRouteType(trackType);
 
+        closeCreateFormLayout();
     }
 
     // Обработчик нажатия кнопки "Отмена" при создании/изменении объекта
@@ -820,7 +877,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void onSaveRouteDeleteButtonClick(View view) {
         mapObjects.remove(clickedRoute);
-        presenter.removeRoute(clickedRoute);
+        if (presenter.getRoute(clickedRoute) != null) {
+            presenter.removeRoute(clickedRoute);
+        }
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+    }
+
+    public void onSaveRouteDeleteTrackButtonClick(View view) {
+        mapObjects.remove(clickedTrack);
+        if (presenter.getTrack(clickedTrack) != null) {
+            presenter.removeTrack(clickedTrack);
+        }
         saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
     }
 
@@ -839,6 +906,23 @@ public class MainActivity extends AppCompatActivity {
 
         saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
         createOrChangeButton.setOnClickListener(this::onCreateFormChangeRouteButtonClick);
+    }
+
+    public void onSaveRouteSaveTrackButtonClick(View view) {
+        openCreateFormLayout("Сохранить трек", "трека", "трека");
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+        createOrChangeButton.setOnClickListener(this::onCreateFormCreateTrackButtonClick);
+    }
+
+    public void onSaveRouteChangeTrackButtonClick(View view) {
+        openCreateFormLayout("Изменить трек", "трека", "трека");
+
+        Route track = presenter.getTrack(clickedTrack);
+        createOrChangeInputNameText.setText(track.getName());
+        createOrChangeInputDescriptionText.setText(track.getDescription());
+
+        saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
+        createOrChangeButton.setOnClickListener(this::onCreateFormChangeTrackButtonClick);
     }
 
     // Обработчики окна изменения параметров отображения меток/маршрутов/треков
@@ -860,6 +944,7 @@ public class MainActivity extends AppCompatActivity {
             saveOrChangeButton.setOnClickListener(this::onSaveRouteChangeButtonClick);
         }
         saveOrChangeRouteLayout.setVisibility(View.VISIBLE);
+        deleteTrackOrRouteButton.setOnClickListener(this::onSaveRouteDeleteButtonClick);
         return false;
     };
 
@@ -869,10 +954,13 @@ public class MainActivity extends AppCompatActivity {
         Button saveOrChangeButton = findViewById(R.id.doTrackOrRouteButton);
         if (presenter.getTrack(mapObject) == null) {
             saveOrChangeButton.setText("Сохранить");
+            saveOrChangeButton.setOnClickListener(this::onSaveRouteSaveTrackButtonClick);
         } else {
             saveOrChangeButton.setText("Изменить");
+            saveOrChangeButton.setOnClickListener(this::onSaveRouteChangeTrackButtonClick);
         }
         saveOrChangeRouteLayout.setVisibility(View.VISIBLE);
+        deleteTrackOrRouteButton.setOnClickListener(this::onSaveRouteDeleteTrackButtonClick);
         return false;
     };
 }

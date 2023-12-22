@@ -18,7 +18,7 @@ public class Presenter {
     private final Model model;
     private final Map<MapObject, Marker> markerMap;
     private final Map<MapObject, Route> routeMap;
-    private final Map<MapObject, Track> trackMap;
+    private final Map<MapObject, Route> trackMap;
 
     public Presenter(String filesDir) {
         this.model = new Model(filesDir);
@@ -66,9 +66,15 @@ public class Presenter {
         addRoute(route);
     }
 
-    public void addTrack(Track track) {
+    public void addTrack(Route track) {
         trackMap.put(track.getPolyline(), track);
-        model.addTrack(track.getTrackInfo());
+        model.addTrack(track.getRouteInfo());
+    }
+
+    public void addTrack(PolylineMapObject polyline, String name, String description, ObjectType type, LocalDateTime dateTime) {
+        RouteInfo trackInfo = new RouteInfo(polyline.getGeometry().getPoints(), name, description, type, dateTime, true);
+        Route track = new Route(polyline, trackInfo);
+        addTrack(track);
     }
 
     public Marker getMarker(MapObject placemark) {
@@ -96,7 +102,7 @@ public class Presenter {
         return routeMap.get(polyline);
     }
 
-    public Track getTrack(MapObject polyline) {
+    public Route getTrack(MapObject polyline) {
         return trackMap.get(polyline);
     }
 
@@ -106,7 +112,7 @@ public class Presenter {
     }
 
     public void removeTrack(MapObject polyline) {
+        model.removeTrack(trackMap.get(polyline).getRouteInfo());
         trackMap.remove(polyline);
-        model.removeTrack(trackMap.get(polyline).getTrackInfo());
     }
 }
