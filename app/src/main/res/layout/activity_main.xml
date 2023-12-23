@@ -12,7 +12,7 @@
         android:id="@+id/loadingScreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <ImageView
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/forest_background"
         android:orientation="vertical"
-        android:visibility="invisible">
+        android:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -64,9 +64,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top|center"
             android:layout_marginLeft="60dp"
-            android:layout_marginRight="60dp"
             android:layout_marginTop="130dp"
+            android:layout_marginRight="60dp"
             android:backgroundTint="#FFE082"
+            android:onClick="onStartScreenRegistrationButtonClick"
             android:padding="15dp"
             android:text="@string/registrationButtonText"
             android:textAllCaps="false"
@@ -74,8 +75,7 @@
             android:textSize="24sp"
             app:cornerRadius="20dp"
             app:strokeColor="#FF6F00"
-            app:strokeWidth="5dp"
-            android:onClick="onStartScreenRegistrationButtonClick"/>
+            app:strokeWidth="5dp" />
 
         <Button
             android:id="@+id/loginButton"
@@ -83,9 +83,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top|center"
             android:layout_marginLeft="60dp"
-            android:layout_marginRight="60dp"
             android:layout_marginTop="30dp"
+            android:layout_marginRight="60dp"
             android:backgroundTint="#FFE082"
+            android:onClick="onStartScreenLoginButtonClick"
             android:padding="15dp"
             android:text="@string/loginButtonText"
             android:textAllCaps="false"
@@ -93,8 +94,7 @@
             android:textSize="24sp"
             app:cornerRadius="20dp"
             app:strokeColor="#FF6F00"
-            app:strokeWidth="5dp"
-            android:onClick="onStartScreenLoginButtonClick"/>
+            app:strokeWidth="5dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -963,7 +963,9 @@
                 android:layout_height="30dp"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="20dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="10dp"
+                android:checked="true"
+                android:onClick="onVisibilityListFishButtonClick" />
 
             <RadioButton
                 android:id="@+id/mushroomDisplayRadioButton"
@@ -971,7 +973,9 @@
                 android:layout_height="30dp"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginRight="30dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="10dp"
+                android:checked="true"
+                android:onClick="onVisibilityListMushroomButtonClick" />
 
             <RadioButton
                 android:id="@+id/walkDisplayRadioButton"
@@ -979,7 +983,9 @@
                 android:layout_height="30dp"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginLeft="30dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="10dp"
+                android:checked="true"
+                android:onClick="onVisibilityListWalkButtonClick" />
 
             <RadioButton
                 android:id="@+id/defaultDisplayRadioButton"
@@ -987,7 +993,9 @@
                 android:layout_height="30dp"
                 android:layout_gravity="bottom|right"
                 android:layout_marginRight="20dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="10dp"
+                android:checked="true"
+                android:onClick="onVisibilityListDefaultButtonClick" />
 
         </FrameLayout>
 

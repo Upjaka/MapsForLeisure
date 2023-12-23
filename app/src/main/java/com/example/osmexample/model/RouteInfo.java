@@ -10,7 +10,7 @@ public class RouteInfo {
     private String name;
     private String description;
     private ObjectType routeType;
-    private final LocalDateTime dateTime;
+    private final String dateTime;
     private boolean visible;
 
 
@@ -19,7 +19,7 @@ public class RouteInfo {
         this.name = name;
         this.description = description;
         this.routeType = routeType;
-        this.dateTime = dateTime;
+        this.dateTime = dateTime.toString();
         this.visible = visible;
     }
 
@@ -51,7 +51,7 @@ public class RouteInfo {
     }
 
     public LocalDateTime getDateTime() {
-        return dateTime;
+        return LocalDateTime.parse(dateTime);
     }
 
     public boolean isVisible() {

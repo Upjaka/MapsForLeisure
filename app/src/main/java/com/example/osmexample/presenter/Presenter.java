@@ -10,6 +10,7 @@ import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.map.PolylineMapObject;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,36 @@ public class Presenter {
 
     public List<RouteInfo> getTrackList() {
         return model.getTrackList();
+    }
+
+    public List<Marker> getMarkersWithType(ObjectType type) {
+        List<Marker> result = new ArrayList<>();
+        for (Marker marker : markerMap.values()) {
+            if (marker.getMarkerType() == type) {
+                result.add(marker);
+            }
+        }
+        return result;
+    }
+
+    public List<Route> getRoutesWithType(ObjectType type) {
+        List<Route> result = new ArrayList<>();
+        for (Route route : routeMap.values()) {
+            if (route.getRouteType() == type) {
+                result.add(route);
+            }
+        }
+        return result;
+    }
+
+    public List<Route> getTracksWithType(ObjectType type) {
+        List<Route> result = new ArrayList<>();
+        for (Route track : trackMap.values()) {
+            if (track.getRouteType() == type) {
+                result.add(track);
+            }
+        }
+        return result;
     }
 
     public void addMarker(Marker marker) {
@@ -93,18 +124,41 @@ public class Presenter {
         return null;
     }
 
-    public void removeMarker(MapObject placemark) {
-        model.removeMarker(markerMap.get(placemark).getMarkerInfo());
-        markerMap.remove(placemark);
-    }
-
     public Route getRoute(MapObject polyline) {
         return routeMap.get(polyline);
+    }
+
+    public Route getRoute(int index) {
+        RouteInfo routeInfo = model.getRouteList().get(index);
+
+        for (Route route : routeMap.values()) {
+            if (route.getRouteInfo() == routeInfo) {
+                return route;
+            }
+        }
+        return null;
     }
 
     public Route getTrack(MapObject polyline) {
         return trackMap.get(polyline);
     }
+
+    public Route getTrack(int index) {
+        RouteInfo trackInfo = model.getTrackList().get(index);
+
+        for (Route track : trackMap.values()) {
+            if (track.getRouteInfo() == trackInfo) {
+                return track;
+            }
+        }
+        return null;
+    }
+
+    public void removeMarker(MapObject placemark) {
+        model.removeMarker(markerMap.get(placemark).getMarkerInfo());
+        markerMap.remove(placemark);
+    }
+
 
     public void removeRoute(MapObject polyline) {
         model.removeRoute(routeMap.get(polyline).getRouteInfo());

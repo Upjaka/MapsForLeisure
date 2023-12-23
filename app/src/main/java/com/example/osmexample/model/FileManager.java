@@ -63,7 +63,7 @@ public class FileManager {
     }
 
     public static List<RouteInfo> loadRoutesFromFile(String filesDir) {
-        //new File(getFilesDir() + "/routes.json").delete();
+        //new File(filesDir + "/routes.json").delete();
         Gson gson = new Gson();
         ArrayList<RouteInfo> routes;
         try (FileReader reader = new FileReader(filesDir + "/routes.json")) {
@@ -94,7 +94,7 @@ public class FileManager {
     }
 
     public static List<RouteInfo> loadTracksFromFile(String filesDir) {
-        //new File(getFilesDir() + "/tracks.json").delete();
+        //new File(filesDir + "/tracks.json").delete();
         Gson gson = new Gson();
         ArrayList<RouteInfo> tracks;
         try (FileReader reader = new FileReader(filesDir + "/tracks.json")) {

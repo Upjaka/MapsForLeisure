@@ -123,6 +123,10 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout saveOrChangeRouteLayout = null;
     private Button createOrChangeButton = null;
     private Button deleteTrackOrRouteButton = null;
+    private RadioButton defaultVisibleRadioButton = null;
+    private RadioButton mushroomVisibleRadioButton = null;
+    private RadioButton fishVisibleRadioButton = null;
+    private RadioButton walkVisibleRadioButton = null;
     private java.util.Map<ObjectType, Integer> imageViewMap = null;
     private int trackColor = Color.rgb(50, 205, 50);
 
@@ -168,6 +172,10 @@ public class MainActivity extends AppCompatActivity {
         authorizationLayout = findViewById(R.id.authorizationLayout);
         newPasswordLayout = findViewById(R.id.newPasswordLayout);
         deleteTrackOrRouteButton = findViewById(R.id.deleteTrackOrRouteButton);
+        defaultVisibleRadioButton = findViewById(R.id.defaultDisplayRadioButton);
+        mushroomVisibleRadioButton = findViewById(R.id.mushroomDisplayRadioButton);
+        fishVisibleRadioButton = findViewById(R.id.fishDisplayRadioButton);
+        walkVisibleRadioButton = findViewById(R.id.walkDisplayRadioButton);
 
         // Определение местоположения
         requestLocationPermission();
@@ -444,6 +452,7 @@ public class MainActivity extends AppCompatActivity {
     private void drawRoute(RouteInfo routeInfo) {
         PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(routeInfo.getPoints()));
         polyline.addTapListener(routePolylineTap);
+        polyline.setVisible(routeInfo.isVisible());
         Route route = new Route(polyline, routeInfo);
         presenter.addRoute(route);
     }
@@ -452,6 +461,7 @@ public class MainActivity extends AppCompatActivity {
         PolylineMapObject polyline = mapObjects.addPolyline(new Polyline(trackInfo.getPoints()));
         polyline.setStrokeColor(trackColor);
         polyline.addTapListener(trackPolylineTap);
+        polyline.setVisible(trackInfo.isVisible());
         Route track = new Route(polyline, trackInfo);
         presenter.addTrack(track);
     }
@@ -523,6 +533,26 @@ public class MainActivity extends AppCompatActivity {
         createFormLayout.setVisibility(View.INVISIBLE);
     }
 
+    private void setObjectsVisibility(ObjectType type, boolean visibility) {
+        List<Marker> markers = presenter.getMarkersWithType(type);
+        for (Marker marker : markers) {
+            marker.getPlacemark().setVisible(visibility);
+            marker.setVisible(visibility);
+        }
+
+        List<Route> routes = presenter.getRoutesWithType(type);
+        for (Route route : routes) {
+            route.getPolyline().setVisible(visibility);
+            route.setVisible(visibility);
+        }
+
+        List<Route> tracks = presenter.getTracksWithType(type);
+        for (Route track : tracks) {
+            track.getPolyline().setVisible(visibility);
+            track.setVisible(visibility);
+        }
+    }
+
     // Обработчики для главного экрана
 
     // Обработчик нажатия кнопки текущего местоположения
@@ -566,6 +596,38 @@ public class MainActivity extends AppCompatActivity {
     // Обработчик кнопки "Отображение слоев"
     public void onVisibilityListButtonClick(View view) {
         displayLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onVisibilityListDefaultButtonClick(View view) {
+        boolean visibility = defaultVisibleRadioButton.isActivated();
+        defaultVisibleRadioButton.setChecked(visibility);
+        defaultVisibleRadioButton.setActivated(!visibility);
+
+        setObjectsVisibility(ObjectType.DEFAULT, visibility);
+    }
+
+    public void onVisibilityListFishButtonClick(View view) {
+        boolean visibility = fishVisibleRadioButton.isActivated();
+        fishVisibleRadioButton.setChecked(visibility);
+        fishVisibleRadioButton.setActivated(!visibility);
+
+        setObjectsVisibility(ObjectType.FISH, visibility);
+    }
+
+    public void onVisibilityListMushroomButtonClick(View view) {
+        boolean visibility = mushroomVisibleRadioButton.isActivated();
+        mushroomVisibleRadioButton.setChecked(visibility);
+        mushroomVisibleRadioButton.setActivated(!visibility);
+
+        setObjectsVisibility(ObjectType.MUSHROOM, visibility);
+    }
+
+    public void onVisibilityListWalkButtonClick(View view) {
+        boolean visibility = walkVisibleRadioButton.isActivated();
+        walkVisibleRadioButton.setChecked(visibility);
+        walkVisibleRadioButton.setActivated(!visibility);
+
+        setObjectsVisibility(ObjectType.WALK, visibility);
     }
 
     // Обработчик нажатия кнопки "Запись трека"
@@ -884,9 +946,102 @@ public class MainActivity extends AppCompatActivity {
             selectedMarker.setVisible(true);
         }
         listMarkersAdapter.notifyDataSetChanged();
-
-
     }
+
+    public void onRouteListDeleteButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listRoutesItems.get(position);
+
+        // Показываем окно с подтверждением удаления
+        confirmationLayout.setVisibility(View.VISIBLE);
+        TextView confirmationText = findViewById(R.id.confirmationText);
+        confirmationText.setText("Вы точно хотите удалить маршрут?");
+        Button confirmButton = findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(v -> {
+            listRoutesItems.remove(selectedItem);
+
+            Route deletedRoute = presenter.getRoute(position);
+
+            mapObjects.remove(deletedRoute.getPolyline());
+            presenter.removeRoute(deletedRoute.getPolyline());
+
+            if (presenter.getRouteList().isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
+            }
+
+            listRoutesAdapter.notifyDataSetChanged();
+            confirmationLayout.setVisibility(View.INVISIBLE);
+        });
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
+    }
+
+    public void onRouteListSetVisibleButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listRoutesItems.get(position);
+
+        Route selectedRoute = presenter.getRoute(position);
+
+        // Меняем изображение кнопки displayButton
+        if (selectedRoute.isVisible()) {
+            selectedItem.setImageId3(R.drawable.invisible);
+            selectedRoute.getPolyline().setVisible(false);
+            selectedRoute.setVisible(false);
+        } else {
+            selectedItem.setImageId3(R.drawable.visible);
+            selectedRoute.getPolyline().setVisible(true);
+            selectedRoute.setVisible(true);
+        }
+        listRoutesAdapter.notifyDataSetChanged();
+    }
+
+    public void onTrackListDeleteButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listTracksItems.get(position);
+
+        // Показываем окно с подтверждением удаления
+        confirmationLayout.setVisibility(View.VISIBLE);
+        TextView confirmationText = findViewById(R.id.confirmationText);
+        confirmationText.setText("Вы точно хотите удалить трек?");
+        Button confirmButton = findViewById(R.id.confirmButton);
+        confirmButton.setOnClickListener(v -> {
+            listTracksItems.remove(selectedItem);
+
+            Route deletedTrack = presenter.getTrack(position);
+
+            mapObjects.remove(deletedTrack.getPolyline());
+            presenter.removeTrack(deletedTrack.getPolyline());
+
+            if (presenter.getRouteList().isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
+            }
+
+            listTracksAdapter.notifyDataSetChanged();
+            confirmationLayout.setVisibility(View.INVISIBLE);
+        });
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
+    }
+
+    public void onTrackListSetVisibleButtonClick(int position) {
+        // Получаем выбранный элемент списка
+        ListItem selectedItem = listTracksItems.get(position);
+
+        Route selectedTrack = presenter.getTrack(position);
+
+        // Меняем изображение кнопки displayButton
+        if (selectedTrack.isVisible()) {
+            selectedItem.setImageId3(R.drawable.invisible);
+            selectedTrack.getPolyline().setVisible(false);
+            selectedTrack.setVisible(false);
+        } else {
+            selectedItem.setImageId3(R.drawable.visible);
+            selectedTrack.getPolyline().setVisible(true);
+            selectedTrack.setVisible(true);
+        }
+        listTracksAdapter.notifyDataSetChanged();
+    }
+
 
     public void onSaveRouteCloseButtonClick(View view) {
         saveOrChangeRouteLayout.setVisibility(View.INVISIBLE);
@@ -1036,99 +1191,5 @@ public class MainActivity extends AppCompatActivity {
     public void onNewPasswordLayoutReturnToLoginButtonClick(View view) {
         newPasswordLayout.setVisibility(View.INVISIBLE);
         authorizationLayout.setVisibility(View.VISIBLE);
-    }
-
-    public void onRouteListDeleteButtonClick(int position) {
-        // Получаем выбранный элемент списка
-        ListItem selectedItem = listRoutesItems.get(position);
-
-        // Показываем окно с подтверждением удаления
-        confirmationLayout.setVisibility(View.VISIBLE);
-        TextView confirmationText = findViewById(R.id.confirmationText);
-        confirmationText.setText("Вы точно хотите удалить маршрут?");
-        Button confirmButton = findViewById(R.id.confirmButton);
-        confirmButton.setOnClickListener(v -> {
-            listRoutesItems.remove(selectedItem);
-
-            //Route deletedRoute = presenter.getRoute(position);
-
-            //mapObjects.remove(deletedRoute.getPlacemark());
-            //presenter.removeMarker(deletedRoute.getPlacemark());
-
-            if (presenter.getRouteList().isEmpty()) {
-                emptyListText.setVisibility(View.VISIBLE);
-            }
-
-            listRoutesAdapter.notifyDataSetChanged();
-            confirmationLayout.setVisibility(View.INVISIBLE);
-        });
-        Button cancelButton = findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
-    }
-
-    public void onRouteListSetVisibleButtonClick(int position) {
-        // Получаем выбранный элемент списка
-        ListItem selectedItem = listRoutesItems.get(position);
-
-        //Route selectedRoute = presenter.getRoute(position);
-
-        // Меняем изображение кнопки displayButton
-        /*if (selectedRoute.isVisible()) {
-            selectedItem.setImageId3(R.drawable.invisible);
-            selectedRoute.getPlacemark().setVisible(false);
-            selectedRoute.setVisible(false);
-        } else {
-            selectedItem.setImageId3(R.drawable.visible);
-            selectedRoute.getPlacemark().setVisible(true);
-            selectedRoute.setVisible(true);
-        }*/
-        listRoutesAdapter.notifyDataSetChanged();
-    }
-
-    public void onTrackListDeleteButtonClick(int position) {
-        // Получаем выбранный элемент списка
-        ListItem selectedItem = listTracksItems.get(position);
-
-        // Показываем окно с подтверждением удаления
-        confirmationLayout.setVisibility(View.VISIBLE);
-        TextView confirmationText = findViewById(R.id.confirmationText);
-        confirmationText.setText("Вы точно хотите удалить трек?");
-        Button confirmButton = findViewById(R.id.confirmButton);
-        confirmButton.setOnClickListener(v -> {
-            listTracksItems.remove(selectedItem);
-
-            //Route deletedRoute = presenter.getRoute(position);
-
-            //mapObjects.remove(deletedRoute.getPlacemark());
-            //presenter.removeMarker(deletedRoute.getPlacemark());
-
-            if (presenter.getRouteList().isEmpty()) {
-                emptyListText.setVisibility(View.VISIBLE);
-            }
-
-            listTracksAdapter.notifyDataSetChanged();
-            confirmationLayout.setVisibility(View.INVISIBLE);
-        });
-        Button cancelButton = findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(v -> confirmationLayout.setVisibility(View.INVISIBLE));
-    }
-
-    public void onTrackListSetVisibleButtonClick(int position) {
-        // Получаем выбранный элемент списка
-        ListItem selectedItem = listTracksItems.get(position);
-
-        //Route selectedTrack = presenter.getTrack(position);
-
-        // Меняем изображение кнопки displayButton
-        /*if (selectedRoute.isVisible()) {
-            selectedItem.setImageId3(R.drawable.invisible);
-            selectedRoute.getPlacemark().setVisible(false);
-            selectedRoute.setVisible(false);
-        } else {
-            selectedItem.setImageId3(R.drawable.visible);
-            selectedRoute.getPlacemark().setVisible(true);
-            selectedRoute.setVisible(true);
-        }*/
-        listTracksAdapter.notifyDataSetChanged();
     }
 }
